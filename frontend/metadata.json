@@ -1,0 +1,6 @@
+{
+  "name": "Pulse Dashboard Workspace",
+  "description": "Pulse is a fully interactive, pixel-perfect premium project workspace dashboard inspired by Linear, Notion, and Stripe. Plan features, coordinate code releases, monitor completion velocities, and track team milestones.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

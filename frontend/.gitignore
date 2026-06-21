@@ -1,0 +1,26 @@
+# dependencies
+node_modules/
+
+# production
+dist/
+build/
+
+# logs
+*.log
+
+# env
+.env
+.env.local
+.env.*
+
+# IDE
+.vscode/
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# Docker
+*.tar
