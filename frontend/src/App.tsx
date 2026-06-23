@@ -11,7 +11,7 @@ import {
 import { Task, TaskStatus, Project, ActivityLog, ProjectFile, Notification, Priority } from "./types";
 
 // Inner-components imports
-import LandingPage from "./components/LandingPage";
+import LandingPage from "./pages/LandingPage";
 import SimpleLoginSignup from "./components/SimpleLoginSignup";
 import Sidebar from "./components/Sidebar";
 import Header from "./components/Header";
