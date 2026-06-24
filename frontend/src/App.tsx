@@ -9,7 +9,6 @@ import {
   initialMockNotifications 
 } from "./data";
 import { Task, TaskStatus, Project, ActivityLog, ProjectFile, Notification, Priority } from "./types";
-import AppRoutes from "./routes/AppRoutes";
 // Inner-components imports
 import LandingPage from "./components/LandingPage";
 import SimpleLoginSignup from "./components/SimpleLoginSignup";
@@ -112,7 +111,19 @@ export default function App() {
   const [editingTask, setEditingTask] = useState<Task | null>(null);
 
   // Profile username edits in settings
-  const [userName, setUserName] = useState("Alex Rivera");
+  const [userName, setUserName] = useState(() => {
+  const savedUser = localStorage.getItem("pulse_user");
+
+  if (savedUser) {
+    try {
+      return JSON.parse(savedUser).name;
+    } catch {
+      return "Alex Rivera";
+    }
+  }
+
+  return "Alex Rivera";
+});
 
   // Sync to localCache
   useEffect(() => {
@@ -496,7 +507,6 @@ export default function App() {
   }
 
   // Active platform layout
-  return <AppRoutes />;
   return (
     <div className="flex bg-[#0b0c10] text-[#f4f6fe] h-screen overflow-hidden font-sans select-none antialiased selection:bg-[#4f46e5] selection:text-white">
       

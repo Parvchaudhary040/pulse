@@ -65,7 +65,9 @@ export default function DashboardView({
       {/* Greetings Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-black text-white tracking-tight uppercase">Good morning, Alex.</h2>
+          <h2 className="text-2xl font-black text-white tracking-tight uppercase">
+  Good morning, {JSON.parse(localStorage.getItem("pulse_user") || "{}").name || "Alex"}.
+</h2>
           <p className="text-xs text-gray-450 text-gray-400 font-light mt-1">
             Here is a summary of your workspace speed. You have <span className="text-[#10b981] font-semibold">{myTasks.filter(t => t.status !== TaskStatus.DONE).length} pending coordinates</span> assigned to you.
           </p>
@@ -105,7 +107,9 @@ export default function DashboardView({
             <span id="metric-my-tasks-count" className="text-2xl font-black text-white leading-none block">
               {myTasks.filter(t => t.status !== TaskStatus.DONE).length}
             </span>
-            <span className="text-[10px] text-[#10b981] block font-semibold">Alex Rivera assigned</span>
+            <span className="text-[10px] text-[#10b981] block font-semibold">
+  {JSON.parse(localStorage.getItem("pulse_user") || "{}").name || "Alex"} assigned
+</span>
           </div>
           <div className="w-10 h-10 rounded-xl bg-indigo-505 bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
             <Layers className="w-5 h-5 text-indigo-400" />
