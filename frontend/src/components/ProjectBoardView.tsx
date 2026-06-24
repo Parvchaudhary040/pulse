@@ -221,7 +221,7 @@ export default function ProjectBoardView({
 
                         {/* Middle properties: date & labels */}
                         <div className="flex flex-wrap gap-1 items-center">
-                          {task.labels.map((lab, lid) => (
+                          {(task.labels || []).map(label => (
                             <span key={lid} className="text-[9px] font-mono font-bold bg-indigo-950/20 test-[#a855f7] border border-[#a855f7]/25 text-indigo-300 px-1.5 py-0.5 rounded">
                               {lab}
                             </span>

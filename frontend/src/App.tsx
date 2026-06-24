@@ -1,9 +1,10 @@
+import * as projectService from "./services/projectService";
+import * as taskService from "./services/taskService";
 import React, { useState, useEffect } from "react";
 import { 
   currentUser, 
   teamMembers, 
   projects as seedProjects, 
-  initialTasks, 
   initialActivityLogs, 
   initialProjectFiles, 
   initialMockNotifications 
@@ -52,27 +53,10 @@ export default function App() {
   });
 
   // Load / Persist Tasks State
-  const [tasks, setTasks] = useState<Task[]>(() => {
-    const saved = localStorage.getItem("pulse_tasks");
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {}
-    }
-    return initialTasks;
-  });
+  const [tasks, setTasks] = useState<Task[]>([]);
 
   // Load / Persist Projects State
-  const [projects, setProjects] = useState<Project[]>(() => {
-    const saved = localStorage.getItem("pulse_projects");
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {}
-    }
-    return seedProjects;
-  });
-
+  const [projects, setProjects] = useState<Project[]>([]);
   // Load / Persist Activities
   const [activityLogs, setActivityLogs] = useState<ActivityLog[]>(() => {
     const saved = localStorage.getItem("pulse_activities");
@@ -127,6 +111,44 @@ export default function App() {
 
   // Sync to localCache
   useEffect(() => {
+  const loadProjects = async () => {
+    try {
+      const response =
+        await projectService.getProjects();
+
+      console.log(
+        "Projects from DB:",
+        response.projects
+      );
+
+      setProjects(response.projects);
+    } catch (error) {
+      console.error(
+        "Failed to load projects",
+        error
+      );
+    }
+  };
+
+  loadProjects();
+}, []);
+
+  useEffect(() => {
+  const loadTasks = async () => {
+    try {
+      const response = await taskService.getTasks();
+
+      console.log("Tasks from DB:", response.tasks);
+
+      setTasks(response.tasks);
+    } catch (error) {
+      console.error("Failed to load tasks", error);
+    }
+  };
+
+  loadTasks();
+}, []);
+  useEffect(() => {
     localStorage.setItem("pulse_auth", JSON.stringify(authState));
   }, [authState]);
 
@@ -151,11 +173,6 @@ export default function App() {
       return p;
     }));
   }, [tasks]);
-
-  useEffect(() => {
-    localStorage.setItem("pulse_projects", JSON.stringify(projects));
-  }, [projects]);
-
   useEffect(() => {
     localStorage.setItem("pulse_activities", JSON.stringify(activityLogs));
   }, [activityLogs]);
@@ -218,26 +235,32 @@ export default function App() {
     setIsTaskModalOpen(true);
   };
 
-  const handleSaveTask = (taskData: Omit<Task, "id" | "createdAt"> & { id?: string }) => {
+  const handleSaveTask = async (taskData: Omit<Task, "id" | "createdAt"> & { id?: string }) => {
     const defaultUserAvatar = "https://images.unsplash.com/photo-1534528741775-53994a60daeb?auto=format&fit=crop&q=80&w=256&h=256";
     
     if (taskData.id) {
       // Edit operation
-      setTasks(prev => prev.map(t => {
-        if (t.id === taskData.id) {
-          return {
-            ...t,
+      try {
+        await taskService.updateTask(
+          Number(taskData.id),
+          {
             title: taskData.title,
             description: taskData.description,
             status: taskData.status,
             priority: taskData.priority,
-            assigneeId: taskData.assigneeId,
-            dueDate: taskData.dueDate,
-            labels: taskData.labels
-          };
-        }
-        return t;
-      }));
+          }
+        );
+
+        const response = await taskService.getTasks();
+
+        setTasks(response.tasks);
+
+        alert("Task updated successfully!");
+      } catch (error) {
+        console.error(error);
+        alert("Failed to update task");
+        return;
+      }
 
       // Register activity log
       const log: ActivityLog = {
@@ -255,20 +278,28 @@ export default function App() {
 
     } else {
       // Create Operation
-      const newTask: Task = {
-        id: "task-" + Date.now(),
-        title: taskData.title,
-        description: taskData.description,
-        status: taskData.status,
-        priority: taskData.priority,
-        assigneeId: taskData.assigneeId,
-        projectId: taskData.projectId,
-        dueDate: taskData.dueDate,
-        labels: taskData.labels,
-        createdAt: new Date().toISOString().split("T")[0]
-      };
+      try {
+        await taskService.createTask({
+          title: taskData.title,
+          description: taskData.description,
+          status: taskData.status,
+        });
 
-      setTasks(prev => [...prev, newTask]);
+        const response = await taskService.getTasks();
+
+        setTasks(response.tasks);
+
+        alert("Task created successfully!");
+      }
+      catch (error: any) {
+  console.error("CREATE TASK ERROR:", error);
+  console.error("RESPONSE:", error?.response?.data);
+
+  alert(
+    error?.response?.data?.message ||
+    "Failed to create task"
+  );
+}
 
       // Register activity log
       const log: ActivityLog = {
@@ -297,77 +328,144 @@ export default function App() {
     }
   };
 
-  const handleDeleteTask = (id: string) => {
+  const handleDeleteTask = async (id: string) => {
     const targetTask = tasks.find(t => t.id === id);
     if (!targetTask) return;
 
     if (confirm(`Are you sure you want to purge task coordinate: "${targetTask.title}"?`)) {
-      setTasks(prev => prev.filter(t => t.id !== id));
+      try {
+        await taskService.deleteTask(Number(id));
 
-      // Append file timeline activity log
+        const response = await taskService.getTasks();
+
+        setTasks(response.tasks);
+
+        alert("Task deleted successfully!");
+
+      } catch (error) {
+        console.error(error);
+        alert("Failed to delete task");
+      }
+
       const log: ActivityLog = {
         id: "log-" + Date.now(),
         userId: "user-1",
         userName: userName,
-        userAvatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=256&h=256",
+        userAvatar:
+          "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=256&h=256",
         action: "purged card from",
         targetType: "task",
         targetName: targetTask.title,
         timestamp: "Just now",
         details: `Successfully filtered out task ID: ${id}`
       };
+
       setActivityLogs(prev => [log, ...prev]);
     }
   };
 
-  const handleUpdateTaskStatus = (id: string, nextStatus: TaskStatus) => {
-    setTasks(prev => prev.map(t => t.id === id ? { ...t, status: nextStatus } : t));
+const handleUpdateTaskStatus = async (
+  id: string,
+  nextStatus: TaskStatus
+) => {
+  try {
+    const targetTask = tasks.find(
+      (t) => String(t.id) === String(id)
+    );
 
-    const targetTask = tasks.find(t => t.id === id);
     if (!targetTask) return;
 
-    // Append log
+    await taskService.updateTask(
+      Number(id),
+      {
+        title: targetTask.title,
+        description: targetTask.description,
+        status: nextStatus,
+        priority: targetTask.priority,
+      }
+    );
+
+    const response =
+      await taskService.getTasks();
+
+    setTasks(response.tasks);
+
     const log: ActivityLog = {
       id: "log-" + Date.now(),
       userId: "user-1",
       userName: userName,
-      userAvatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=256&h=256",
+      userAvatar:
+        "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=256&h=256",
       action: "shifted status of",
       targetType: "task",
       targetName: targetTask.title,
       timestamp: "Just now",
       details: `Moved card to column: ${nextStatus}`
     };
+
     setActivityLogs(prev => [log, ...prev]);
-  };
 
-  const handleToggleTaskStatusCheckbox = (id: string) => {
-    setTasks(prev => prev.map(t => {
-      if (t.id === id) {
-        const nextStatus = t.status === TaskStatus.DONE ? TaskStatus.TODO : TaskStatus.DONE;
-        
-        // Log action
-        const log: ActivityLog = {
-          id: "log-" + Date.now(),
-          userId: "user-1",
-          userName: userName,
-          userAvatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=256&h=256",
-          action: nextStatus === TaskStatus.DONE ? "completed task" : "reopened task",
-          targetType: "task",
-          targetName: t.title,
-          timestamp: "Just now",
-          details: nextStatus === TaskStatus.DONE 
-            ? "Marked checkbox status as accomplished." 
-            : "Re-routed coordinate back to active column."
-        };
-        setActivityLogs(p => [log, ...p]);
+  } catch (error) {
+    console.error(error);
+    alert("Failed to update status");
+  }
+};
+const handleToggleTaskStatusCheckbox = async (
+  id: string
+) => {
+  try {
+    const task = tasks.find(
+      (t) => String(t.id) === String(id)
+    );
 
-        return { ...t, status: nextStatus };
+    if (!task) return;
+
+    const nextStatus =
+      task.status === TaskStatus.DONE
+        ? TaskStatus.TODO
+        : TaskStatus.DONE;
+
+    await taskService.updateTask(
+      Number(id),
+      {
+        title: task.title,
+        description: task.description,
+        status: nextStatus,
+        priority: task.priority,
       }
-      return t;
-    }));
-  };
+    );
 
+    const response =
+      await taskService.getTasks();
+
+    setTasks(response.tasks);
+
+    const log: ActivityLog = {
+      id: "log-" + Date.now(),
+      userId: "user-1",
+      userName: userName,
+      userAvatar:
+        "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=256&h=256",
+      action:
+        nextStatus === TaskStatus.DONE
+          ? "completed task"
+          : "reopened task",
+      targetType: "task",
+      targetName: task.title,
+      timestamp: "Just now",
+      details:
+        nextStatus === TaskStatus.DONE
+          ? "Marked checkbox status as accomplished."
+          : "Re-routed coordinate back to active column."
+    };
+
+    setActivityLogs(prev => [log, ...prev]);
+
+  } catch (error) {
+    console.error(error);
+    alert("Failed to update task status");
+  }
+};
   // Activity additions: posting milestone logs
   const handleAddActivityLog = (details: string) => {
     const newLog: ActivityLog = {

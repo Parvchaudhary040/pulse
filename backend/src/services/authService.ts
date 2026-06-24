@@ -1,3 +1,4 @@
+import { pool } from "../database/db";
 import bcrypt from "bcrypt";
 import { generateToken } from "../utils/jwt";
 interface User {
@@ -6,73 +7,77 @@ interface User {
   email: string;
   password: string;
 }
-
-// Temporary in-memory database
-const users: User[] = [];
-
 // Register User
 export const register = async (userData: Omit<User, "id">) => {
-  const existingUser = users.find(
-    (user) => user.email === userData.email
+  const existingUser = await pool.query(
+    "SELECT * FROM users WHERE email = $1",
+    [userData.email]
   );
 
-  if (existingUser) {
+  if (existingUser.rows.length > 0) {
     return {
       success: false,
       message: "User already exists",
     };
   }
 
-const hashedPassword = await bcrypt.hash(userData.password, 10);
+  const hashedPassword = await bcrypt.hash(
+    userData.password,
+    10
+  );
 
-const newUser: User = {
-  id: users.length + 1,
-  ...userData,
-  password: hashedPassword,
-};
-
-  users.push(newUser);
+  const newUser = await pool.query(
+    `INSERT INTO users (name, email, password)
+     VALUES ($1, $2, $3)
+     RETURNING id, name, email`,
+    [
+      userData.name,
+      userData.email,
+      hashedPassword,
+    ]
+  );
 
   return {
-  success: true,
-  message: "User registered successfully",
-  user: {
-    id: newUser.id,
-    name: newUser.name,
-    email: newUser.email,
-  },
+    success: true,
+    message: "User registered successfully",
+    user: newUser.rows[0],
+  };
 };
-};
-
 // Login User
 export const login = async (loginData: {
   email: string;
   password: string;
 }) => {
-  const user = users.find(
-  (u) => u.email === loginData.email
-);
+  const result = await pool.query(
+    "SELECT * FROM users WHERE email = $1",
+    [loginData.email]
+  );
 
-if (!user) {
+  const user = result.rows[0];
+
+  if (!user) {
+    return {
+      success: false,
+      message: "Invalid email or password",
+    };
+  }
+
+  const isPasswordCorrect =
+    await bcrypt.compare(
+      loginData.password,
+      user.password
+    );
+
+  if (!isPasswordCorrect) {
+    return {
+      success: false,
+      message: "Invalid email or password",
+    };
+  }
+
+  const token = generateToken(user.id);
+
   return {
-    success: false,
-    message: "Invalid email or password",
-  };
-}
-
-const isPasswordCorrect = await bcrypt.compare(
-  loginData.password,
-  user.password
-);
-
-if (!isPasswordCorrect) {
-  return {
-    success: false,
-    message: "Invalid email or password",
-  };
-}
-const token = generateToken(user.id);
-return {
     success: true,
     message: "Login successful",
     token,
@@ -88,6 +93,6 @@ return {
 export const getMe = () => {
   return {
     success: true,
-    user: users[0] || null,
+    message: "Coming soon",
   };
 };
