@@ -1,3 +1,4 @@
+import projectRoutes from "./routes/projectRoutes";
 import taskRoutes from "./routes/taskRoutes";
 import authRoutes from "./routes/authRoutes";
 import express from "express";
@@ -22,7 +23,7 @@ app.use(
   })
 );
 app.use(express.json());
-
+app.use("/api/projects", projectRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/tasks", taskRoutes);
 

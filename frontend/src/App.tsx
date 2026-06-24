@@ -1,3 +1,4 @@
+import * as projectService from "./services/projectService";
 import * as taskService from "./services/taskService";
 import React, { useState, useEffect } from "react";
 import { 
@@ -55,16 +56,7 @@ export default function App() {
   const [tasks, setTasks] = useState<Task[]>([]);
 
   // Load / Persist Projects State
-  const [projects, setProjects] = useState<Project[]>(() => {
-    const saved = localStorage.getItem("pulse_projects");
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {}
-    }
-    return seedProjects;
-  });
-
+  const [projects, setProjects] = useState<Project[]>([]);
   // Load / Persist Activities
   const [activityLogs, setActivityLogs] = useState<ActivityLog[]>(() => {
     const saved = localStorage.getItem("pulse_activities");
@@ -119,6 +111,29 @@ export default function App() {
 
   // Sync to localCache
   useEffect(() => {
+  const loadProjects = async () => {
+    try {
+      const response =
+        await projectService.getProjects();
+
+      console.log(
+        "Projects from DB:",
+        response.projects
+      );
+
+      setProjects(response.projects);
+    } catch (error) {
+      console.error(
+        "Failed to load projects",
+        error
+      );
+    }
+  };
+
+  loadProjects();
+}, []);
+
+  useEffect(() => {
   const loadTasks = async () => {
     try {
       const response = await taskService.getTasks();
@@ -158,11 +173,6 @@ export default function App() {
       return p;
     }));
   }, [tasks]);
-
-  useEffect(() => {
-    localStorage.setItem("pulse_projects", JSON.stringify(projects));
-  }, [projects]);
-
   useEffect(() => {
     localStorage.setItem("pulse_activities", JSON.stringify(activityLogs));
   }, [activityLogs]);
