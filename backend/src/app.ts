@@ -1,3 +1,4 @@
+import activityRoutes from "./routes/activityRoutes";
 import dashboardRoutes from "./routes/dashboardRoutes";
 import projectRoutes from "./routes/projectRoutes";
 import taskRoutes from "./routes/taskRoutes";
@@ -28,6 +29,7 @@ app.use("/api/projects", projectRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/tasks", taskRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/activities", activityRoutes);
 
 // Health Check Route
 app.get("/", (req, res) => {
