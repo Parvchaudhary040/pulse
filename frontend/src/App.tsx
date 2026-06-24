@@ -317,7 +317,6 @@ export default function App() {
         details: `Successfully filtered out task ID: ${id}`
       };
       setActivityLogs(prev => [log, ...prev]);
-    }
   };
 
   const handleUpdateTaskStatus = (id: string, nextStatus: TaskStatus) => {
