@@ -1,3 +1,5 @@
+import * as activityService from "./services/activityService";
+import * as dashboardService from "./services/dashboardService";
 import * as projectService from "./services/projectService";
 import * as taskService from "./services/taskService";
 import React, { useState, useEffect } from "react";
@@ -24,6 +26,13 @@ import MobileSimulator from "./components/MobileSimulator";
 import TaskModal from "./components/TaskModal";
 
 export default function App() {
+  const [dashboardStats, setDashboardStats] =
+  useState({
+    totalTasks: 0,
+    completedTasks: 0,
+    activeProjects: 0,
+    completionRate: 0,
+  });
   // Session Authentication state
   const [authState, setAuthState] = useState<{
     isAuthenticated: boolean;
@@ -58,15 +67,7 @@ export default function App() {
   // Load / Persist Projects State
   const [projects, setProjects] = useState<Project[]>([]);
   // Load / Persist Activities
-  const [activityLogs, setActivityLogs] = useState<ActivityLog[]>(() => {
-    const saved = localStorage.getItem("pulse_activities");
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {}
-    }
-    return initialActivityLogs;
-  });
+  const [activityLogs, setActivityLogs] = useState<ActivityLog[]>([]);
 
   // Load / Persist Files lists
   const [projectFiles, setProjectFiles] = useState<ProjectFile[]>(() => {
@@ -129,8 +130,53 @@ export default function App() {
       );
     }
   };
-
   loadProjects();
+}, []);
+
+    useEffect(() => {
+  const loadActivities = async () => {
+    try {
+      const response =
+        await activityService.getActivities();
+
+      setActivityLogs(
+        response.activities
+      );
+    } catch (error) {
+      console.error(
+        "Failed to load activities",
+        error
+      );
+    }
+  };
+
+  loadActivities();
+}, []);
+
+    useEffect(() => {
+  const loadStats = async () => {
+    try {
+      const response =
+        await dashboardService.getStats();
+
+      console.log(
+        "Dashboard Stats:",
+        response.stats
+      );
+
+      setDashboardStats(
+        response.stats
+      );
+
+    } catch (error) {
+      console.error(
+        "Failed to load dashboard stats",
+        error
+      );
+    }
+  };
+
+  loadStats();
 }, []);
 
   useEffect(() => {
@@ -275,6 +321,13 @@ export default function App() {
         details: `Updated fields for sprint task: ${taskData.title}`
       };
       setActivityLogs(prev => [log, ...prev]);
+      await activityService.createActivity({
+        user_name: userName,
+        action: "updated task",
+        target_type: "task",
+        target_name: taskData.title,
+        details: `Updated fields for sprint task: ${taskData.title}`
+      });
 
     } else {
       // Create Operation
@@ -361,6 +414,13 @@ export default function App() {
       };
 
       setActivityLogs(prev => [log, ...prev]);
+      await activityService.createActivity({
+        user_name: userName,
+        action: "deleted task",
+        target_type: "task",
+        target_name: targetTask.title,
+        details: `Deleted task: ${targetTask.title}`,
+      });
     }
   };
 
@@ -404,6 +464,13 @@ const handleUpdateTaskStatus = async (
     };
 
     setActivityLogs(prev => [log, ...prev]);
+    await activityService.createActivity({
+      user_name: userName,
+      action: "changed status",
+      target_type: "task",
+      target_name: targetTask.title,
+      details: `Moved to ${nextStatus}`,
+    });
 
   } catch (error) {
     console.error(error);
@@ -524,6 +591,7 @@ const handleToggleTaskStatusCheckbox = async (
             tasks={tasks}
             projects={projects}
             activityLogs={activityLogs}
+            dashboardStats={dashboardStats}
             onToggleTaskStatus={handleToggleTaskStatusCheckbox}
             onOpenTaskModal={handleOpenNewTaskModal}
           />
@@ -576,6 +644,7 @@ const handleToggleTaskStatusCheckbox = async (
             tasks={tasks}
             projects={projects}
             activityLogs={activityLogs}
+            dashboardStats={dashboardStats}
             onToggleTaskStatus={handleToggleTaskStatusCheckbox}
             onOpenTaskModal={handleOpenNewTaskModal}
           />

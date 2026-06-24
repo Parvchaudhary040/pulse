@@ -16,17 +16,19 @@ import {
 import { Task, Project, ActivityLog, TaskStatus, Priority } from "../types";
 
 interface DashboardViewProps {
-  tasks: Task[];
-  projects: Project[];
-  activityLogs: ActivityLog[];
-  onToggleTaskStatus: (id: string) => void;
-  onOpenTaskModal: () => void;
+  dashboardStats: {
+  totalTasks: number;
+  completedTasks: number;
+  activeProjects: number;
+  completionRate: number;
+};
 }
 
 export default function DashboardView({
   tasks,
   projects,
   activityLogs,
+  dashboardStats,
   onToggleTaskStatus,
   onOpenTaskModal
 }: DashboardViewProps) {
@@ -34,10 +36,10 @@ export default function DashboardView({
   const [newLogText, setNewLogText] = useState("");
 
   // Statistics calculations
-  const activeTasks = tasks.filter(t => t.status !== TaskStatus.DONE);
-  const myTasks = tasks.filter(t => t.assigneeId === "user-1");
-  const compTasksCount = tasks.filter(t => t.status === TaskStatus.DONE).length;
-  const overallVelocityPercent = Math.round((compTasksCount / (tasks.length || 1)) * 100);
+  // const activeTasks = tasks.filter(t => t.status !== TaskStatus.DONE);
+  // const myTasks = tasks.filter(t => t.assigneeId === "user-1");
+  // const compTasksCount = tasks.filter(t => t.status === TaskStatus.DONE).length;
+  // const overallVelocityPercent = Math.round((compTasksCount / (tasks.length || 1)) * 100);
 
   // Velocity values dictionary
   const velocityData: Record<string, { done: number, label: string }> = {
@@ -49,6 +51,7 @@ export default function DashboardView({
     "Sat": { done: 2, label: "Saturday" },
     "Sun": { done: 1, label: "Sunday" }
   };
+  const myTasks = [];
 
   const getPriorityColor = (p: Priority) => {
     switch (p) {
@@ -92,7 +95,7 @@ export default function DashboardView({
         <div className="p-5.5 rounded-2xl bg-[#12131a]/95 border border-gray-800/85 flex items-center justify-between shadow-xl">
           <div className="space-y-1">
             <span className="text-[10px] font-mono text-gray-500 uppercase tracking-widest block font-bold">Unfinished Tasks</span>
-            <span id="metric-unfinished-count" className="text-2xl font-black text-white leading-none block">{activeTasks.length}</span>
+            <span id="metric-unfinished-count" className="text-2xl font-black text-white leading-none block">{dashboardStats.totalTasks}</span>
             <span className="text-[10px] text-gray-405 text-gray-400 block font-light">Sprint 2 active workload</span>
           </div>
           <div className="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center">
@@ -105,7 +108,7 @@ export default function DashboardView({
           <div className="space-y-1">
             <span className="text-[10px] font-mono text-gray-500 uppercase tracking-widest block font-bold">My Assignments</span>
             <span id="metric-my-tasks-count" className="text-2xl font-black text-white leading-none block">
-              {myTasks.filter(t => t.status !== TaskStatus.DONE).length}
+              {dashboardStats.totalTasks}
             </span>
             <span className="text-[10px] text-[#10b981] block font-semibold">
   {JSON.parse(localStorage.getItem("pulse_user") || "{}").name || "Alex"} assigned
@@ -121,11 +124,11 @@ export default function DashboardView({
           <div className="space-y-1">
             <span className="text-[10px] font-mono text-gray-500 uppercase tracking-widest block font-bold">Task Completion</span>
             <div className="flex items-baseline gap-2">
-              <span id="metric-completion-ratio" className="text-2xl font-black text-white leading-none block">{overallVelocityPercent}%</span>
+              <span id="metric-completion-ratio" className="text-2xl font-black text-white leading-none block">{dashboardStats.completionRate}%</span>
               <span className="text-[10px] font-mono text-indigo-400 font-bold">overall</span>
             </div>
             <div className="w-24 h-1.5 bg-gray-800 rounded-full overflow-hidden mt-1 bg-gray-800/60 border border-gray-800">
-              <div className="h-full bg-gradient-to-r from-indigo-550 to-indigo-500 bg-indigo-600 rounded-full" style={{ width: `${overallVelocityPercent}%` }} />
+              <div className="h-full bg-gradient-to-r from-indigo-550 to-indigo-500 bg-indigo-600 rounded-full" style={{ width: `${dashboardStats.completionRate}%` }} />
             </div>
           </div>
           <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-[#6366f1]/20 flex items-center justify-center">
@@ -137,7 +140,7 @@ export default function DashboardView({
         <div className="p-5.5 rounded-2xl bg-[#12131a]/95 border border-gray-800/85 flex items-center justify-between shadow-xl">
           <div className="space-y-1">
             <span className="text-[10px] font-mono text-gray-500 uppercase tracking-widest block font-bold">Active Projects</span>
-            <span className="text-2xl font-black text-white leading-none block">{projects.length}</span>
+            <span className="text-2xl font-black text-white leading-none block">{dashboardStats.activeProjects}</span>
             <span className="text-[10px] text-gray-400 block font-light">3 client sandbox targets</span>
           </div>
           <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-[#10b981]/20 flex items-center justify-center">
@@ -284,7 +287,7 @@ export default function DashboardView({
           <div className="flex items-center justify-between mb-4 border-b border-gray-800 pb-3">
             <h3 className="text-sm font-bold text-white uppercase tracking-tight">Assigned to Me</h3>
             <span className="text-[10px] font-mono text-indigo-400 bg-indigo-950/40 border border-indigo-900/60 px-2.5 py-0.5 rounded-full">
-              {myTasks.filter(t => t.status !== TaskStatus.DONE).length} Pending
+              {dashboardStats.totalTasks} Pending
             </span>
           </div>
 
