@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Eye, EyeOff, Lock, Mail, ArrowRight, Github, Chrome } from "lucide-react";
 import PulseLogo from "./PulseLogo";
+import * as authService from "../services/authService";
 
 interface SimpleLoginSignupProps {
   initialIsSignUp?: boolean;
@@ -22,7 +23,7 @@ export default function SimpleLoginSignup({
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
@@ -42,10 +43,45 @@ export default function SimpleLoginSignup({
     }
 
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      onLoginSuccess(email);
-    }, 850);
+
+try {
+  if (isSignUp) {
+    const response = await authService.register({
+      name: fullName,
+      email,
+      password,
+    });
+
+    if (response.success) {
+      alert("Registration Successful! Please login.");
+      setIsSignUp(false);
+    } else {
+      setError(response.message);
+    }
+  } else {
+    const response = await authService.login({
+      email,
+      password,
+    });
+
+    if (response.success) {
+  localStorage.setItem("token", response.token);
+  localStorage.setItem(
+    "pulse_user",
+    JSON.stringify(response.user)
+  );
+
+  onLoginSuccess(email);
+} 
+    else {
+      setError(response.message);
+    }
+  }
+} catch (error) {
+  setError("Unable to connect to the server.");
+} finally {
+  setLoading(false);
+}
   };
 
   const handleDemoLogin = () => {
