@@ -1,11 +1,10 @@
-import axios from "axios";
+import api from "./api";
 
 const API_URL =
   "http://localhost:5000/api/projects";
 
 export const getProjects = async () => {
-  const response =
-    await axios.get(API_URL);
+  const response = await api.get("/projects");
 
   return response.data;
 };
@@ -13,11 +12,7 @@ export const getProjects = async () => {
 export const createProject = async (
   projectData: any
 ) => {
-  const response =
-    await axios.post(
-      API_URL,
-      projectData
-    );
+  await api.post("/tasks", taskData);
 
   return response.data;
 };

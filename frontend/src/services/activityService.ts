@@ -1,11 +1,10 @@
-import axios from "axios";
+import api from "./api";
 
 const API_URL =
   "http://localhost:5000/api/activities";
 
 export const getActivities = async () => {
-  const response =
-    await axios.get(API_URL);
+  const response = await api.get("/activities");
 
   return response.data;
 };
@@ -13,11 +12,7 @@ export const getActivities = async () => {
 export const createActivity = async (
   activityData: any
 ) => {
-  const response =
-    await axios.post(
-      API_URL,
-      activityData
-    );
+  await api.post("/tasks", taskData);
 
   return response.data;
 };

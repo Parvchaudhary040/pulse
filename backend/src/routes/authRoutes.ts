@@ -5,6 +5,8 @@ import {
   getCurrentUser,
 } from "../controllers/authController";
 
+import { protect } from "../middleware/authMiddleware";
+
 const router = Router();
 
 // Register User
@@ -13,7 +15,7 @@ router.post("/register", registerUser);
 // Login User
 router.post("/login", loginUser);
 
-// Get Logged In User
-router.get("/me", getCurrentUser);
+// Get Current Logged-in User
+router.get("/me", protect, getCurrentUser);
 
 export default router;

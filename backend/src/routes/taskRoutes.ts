@@ -1,3 +1,4 @@
+import { protect } from "../middleware/authMiddleware";
 import { Router } from "express";
 import {
   createTask,
@@ -8,9 +9,10 @@ import {
 
 const router = Router();
 
-router.post("/", createTask);
-router.get("/", getTasks);
-router.put("/:id", updateTask);
-router.delete("/:id", deleteTask);
+router.post("/", protect, createTask);
+router.get("/", protect, getTasks);
+router.put("/:id", protect, updateTask);
+router.delete("/:id", protect, deleteTask);
+
 
 export default router;

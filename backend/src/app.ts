@@ -1,3 +1,4 @@
+import notificationRoutes from "./routes/notificationRoutes";
 import activityRoutes from "./routes/activityRoutes";
 import dashboardRoutes from "./routes/dashboardRoutes";
 import projectRoutes from "./routes/projectRoutes";
@@ -30,6 +31,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/tasks", taskRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/activities", activityRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 // Health Check Route
 app.get("/", (req, res) => {
