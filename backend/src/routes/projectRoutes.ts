@@ -5,12 +5,10 @@ import {
   updateProject,
   deleteProject,
 } from "../controllers/projectController";
-
+import { protect } from "../middleware/authMiddleware";
 const router = Router();
-
-router.post("/", createProject);
-router.get("/", getProjects);
-router.put("/:id", updateProject);
-router.delete("/:id", deleteProject);
-
+router.post("/", protect, createProject);
+router.get("/", protect, getProjects);
+router.put("/:id", protect, updateProject);
+router.delete("/:id", protect, deleteProject);
 export default router;

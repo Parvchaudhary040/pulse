@@ -5,9 +5,11 @@ import {
   getActivities,
 } from "../controllers/activityController";
 
+import { protect } from "../middleware/authMiddleware";
+
 const router = Router();
 
-router.post("/", createActivity);
-router.get("/", getActivities);
+router.post("/", protect, createActivity);
+router.get("/", protect, getActivities);
 
 export default router;

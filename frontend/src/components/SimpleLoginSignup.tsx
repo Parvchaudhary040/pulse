@@ -64,18 +64,22 @@ try {
       password,
     });
 
-    if (response.success) {
-  localStorage.setItem("token", response.token);
+  if (response.success) {
+  localStorage.setItem(
+    "pulse_token",
+    response.token
+  );
+
   localStorage.setItem(
     "pulse_user",
     JSON.stringify(response.user)
   );
 
-  onLoginSuccess(email);
-} 
-    else {
-      setError(response.message);
-    }
+  onLoginSuccess(response.user.email);
+}
+else {
+  setError(response.message);
+}
   }
 } catch (error) {
   setError("Unable to connect to the server.");
