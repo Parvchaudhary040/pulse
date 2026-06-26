@@ -16,12 +16,19 @@ import {
 import { Task, Project, ActivityLog, TaskStatus, Priority } from "../types";
 
 interface DashboardViewProps {
+  tasks: Task[];
+  projects: Project[];
+  activityLogs: ActivityLog[];
+
   dashboardStats: {
-  totalTasks: number;
-  completedTasks: number;
-  activeProjects: number;
-  completionRate: number;
-};
+    totalTasks: number;
+    completedTasks: number;
+    activeProjects: number;
+    completionRate: number;
+  };
+
+  onToggleTaskStatus: (id: string) => void;
+  onOpenTaskModal: () => void;
 }
 
 export default function DashboardView({
@@ -34,7 +41,9 @@ export default function DashboardView({
 }: DashboardViewProps) {
   const [selectedVelocityDay, setSelectedVelocityDay] = useState<string>("Fri");
   const [newLogText, setNewLogText] = useState("");
-
+console.log("Dashboard Tasks:", tasks);
+console.log("Dashboard Projects:", projects);
+console.log("Dashboard Stats:", dashboardStats);
   // Statistics calculations
   // const activeTasks = tasks.filter(t => t.status !== TaskStatus.DONE);
   // const myTasks = tasks.filter(t => t.assigneeId === "user-1");
@@ -51,7 +60,8 @@ export default function DashboardView({
     "Sat": { done: 2, label: "Saturday" },
     "Sun": { done: 1, label: "Sunday" }
   };
-  const myTasks = [];
+  const myTasks = tasks.filter(
+  task => task.status !== TaskStatus.DONE);
 
   const getPriorityColor = (p: Priority) => {
     switch (p) {
