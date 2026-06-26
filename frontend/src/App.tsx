@@ -179,21 +179,24 @@ export default function App() {
   loadStats();
 }, []);
 
-  useEffect(() => {
+useEffect(() => {
+  if (!authState.isAuthenticated) {
+    setTasks([]);
+    return;
+  }
+
   const loadTasks = async () => {
     try {
       const response = await taskService.getTasks();
-
-      console.log("Tasks from DB:", response.tasks);
-
       setTasks(response.tasks);
     } catch (error) {
-      console.error("Failed to load tasks", error);
+      console.error(error);
     }
   };
 
   loadTasks();
-}, []);
+}, [authState.isAuthenticated]);
+
   useEffect(() => {
     localStorage.setItem("pulse_auth", JSON.stringify(authState));
   }, [authState]);

@@ -6,9 +6,10 @@ export const createTask = async (
   res: Response
 ) => {
   try {
-    const task = await taskService.createTask(
-      req.body
-    );
+    const task = await taskService.createTask({
+      ...req.body,
+      user_id: req.user!.id,
+    });
 
     res.status(201).json({
       success: true,
@@ -27,14 +28,16 @@ export const getTasks = async (
   res: Response
 ) => {
   try {
-    const tasks =
-      await taskService.getTasks();
+    console.log("Logged in user ID:", req.user?.id);
+
+    const tasks = await taskService.getTasks(req.user!.id);
 
     res.status(200).json({
       success: true,
       tasks,
     });
   } catch (error) {
+    console.error(error);
     res.status(500).json({
       success: false,
       message: "Failed to fetch tasks",
@@ -50,8 +53,10 @@ export const deleteTask = async (
     const id = Number(req.params.id);
 
     const task =
-      await taskService.deleteTask(id);
-
+    await taskService.deleteTask(
+      Number(req.params.id),
+      req.user!.id
+    );
     res.status(200).json({
       success: true,
       task,
@@ -72,10 +77,11 @@ export const updateTask = async (
     const id = Number(req.params.id);
 
     const task =
-      await taskService.updateTask(
-        id,
-        req.body
-      );
+    await taskService.updateTask(
+      Number(req.params.id),
+      req.body,
+      req.user!.id
+    );
 
     res.status(200).json({
       success: true,
