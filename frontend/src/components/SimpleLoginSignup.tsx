@@ -5,7 +5,7 @@ import * as authService from "../services/authService";
 
 interface SimpleLoginSignupProps {
   initialIsSignUp?: boolean;
-  onLoginSuccess: (email: string) => void;
+  onLoginSuccess: (email: string) => Promise<void>;
   onToggleMode: () => void;
 }
 
@@ -65,17 +65,10 @@ try {
     });
 
   if (response.success) {
-  localStorage.setItem(
-    "pulse_token",
-    response.token
-  );
+  localStorage.setItem("pulse_token", response.token);
+  localStorage.setItem("pulse_user", JSON.stringify(response.user));
 
-  localStorage.setItem(
-    "pulse_user",
-    JSON.stringify(response.user)
-  );
-
-  onLoginSuccess(response.user.email);
+  await onLoginSuccess(email);
 }
 else {
   setError(response.message);

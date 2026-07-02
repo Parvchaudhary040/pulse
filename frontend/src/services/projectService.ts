@@ -1,18 +1,39 @@
 import api from "./api";
 
-const API_URL =
-  "http://localhost:5000/api/projects";
-
 export const getProjects = async () => {
   const response = await api.get("/projects");
-
   return response.data;
 };
 
 export const createProject = async (
   projectData: any
 ) => {
-  await api.post("/tasks", taskData);
+  const response = await api.post(
+    "/projects",
+    projectData
+  );
+
+  return response.data;
+};
+
+export const updateProject = async (
+  id: number,
+  projectData: any
+) => {
+  const response = await api.put(
+    `/projects/${id}`,
+    projectData
+  );
+
+  return response.data;
+};
+
+export const deleteProject = async (
+  id: number
+) => {
+  const response = await api.delete(
+    `/projects/${id}`
+  );
 
   return response.data;
 };

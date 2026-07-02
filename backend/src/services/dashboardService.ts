@@ -1,22 +1,38 @@
 import { pool } from "../database/db";
 
-export const getDashboardStats = async () => {
-  const totalTasksResult = await pool.query(`
-    SELECT COUNT(*) AS count
-    FROM tasks
-  `);
+export const getDashboardStats = async (
+  userId: number
+) => {
+  const totalTasksResult =
+    await pool.query(
+      `
+      SELECT COUNT(*) AS count
+      FROM tasks
+      WHERE user_id = $1
+      `,
+      [userId]
+    );
 
-  const completedTasksResult = await pool.query(`
-    SELECT COUNT(*) AS count
-    FROM tasks
-    WHERE status = 'done'
-  `);
+  const completedTasksResult =
+    await pool.query(
+      `
+      SELECT COUNT(*) AS count
+      FROM tasks
+      WHERE user_id = $1
+      AND status = 'done'
+      `,
+      [userId]
+    );
 
-  const activeProjectsResult = await pool.query(`
-    SELECT COUNT(*) AS count
-    FROM projects
-    WHERE status = 'active'
-  `);
+  const activeProjectsResult =
+    await pool.query(
+      `
+      SELECT COUNT(*) AS count
+      FROM projects
+      WHERE user_id = $1
+      `,
+      [userId]
+    );
 
   const totalTasks = Number(
     totalTasksResult.rows[0].count

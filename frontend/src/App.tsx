@@ -24,8 +24,13 @@ import ProfileView from "./components/ProfileView";
 import SettingsView from "./components/SettingsView";
 import MobileSimulator from "./components/MobileSimulator";
 import TaskModal from "./components/TaskModal";
-
+// ======================
+// APP COMPONENT
+// ======================
 export default function App() {
+  // ======================
+// APPLICATION STATE
+// ======================
   const [dashboardStats, setDashboardStats] =
   useState({
     totalTasks: 0,
@@ -60,10 +65,7 @@ export default function App() {
   const [currentTab, setCurrentTab] = useState<string>(() => {
     return localStorage.getItem("pulse_last_tab") || "dashboard";
   });
-
-  // Load / Persist Tasks State
   const [tasks, setTasks] = useState<Task[]>([]);
-
   // Load / Persist Projects State
   const [projects, setProjects] = useState<Project[]>([]);
   // Load / Persist Activities
@@ -81,16 +83,7 @@ export default function App() {
   });
 
   // Load / Persist Alerts
-  const [notifications, setNotifications] = useState<Notification[]>(() => {
-    const saved = localStorage.getItem("pulse_notifs");
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {}
-    }
-    return initialMockNotifications;
-  });
-
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   // Task Creator Modal indicators
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
@@ -110,73 +103,70 @@ export default function App() {
   return "Alex Rivera";
 });
 
-  // Sync to localCache
-  useEffect(() => {
-  const loadProjects = async () => {
-    try {
-      const response =
-        await projectService.getProjects();
+// ======================
+// DATA LOADER FUNCTIONS
+// ======================
 
-      console.log(
-        "Projects from DB:",
-        response.projects
-      );
+const loadTasks = async () => {
+  try {
+    const response = await taskService.getTasks();
+    setTasks(response.tasks || []);
+  } catch (error) {
+    console.error("Failed to load tasks", error);
+    setTasks([]);
+  }
+};
 
-      setProjects(response.projects);
-    } catch (error) {
-      console.error(
-        "Failed to load projects",
-        error
-      );
-    }
-  };
+const loadProjects = async () => {
+  try {
+    const response = await projectService.getProjects();
+    setProjects(response.projects || []);
+  } catch (error) {
+    console.error("Failed to load projects", error);
+    setProjects([]);
+  }
+};
+
+const loadActivities = async () => {
+  try {
+    const response = await activityService.getActivities();
+    setActivityLogs(response.activities || []);
+  } catch (error) {
+    console.error("Failed to load activities", error);
+    setActivityLogs([]);
+  }
+};
+
+const loadDashboard = async () => {
+  try {
+    const response = await dashboardService.getStats();
+    setDashboardStats(response.stats);
+  } catch (error) {
+    console.error("Failed to load dashboard", error);
+  }
+};
+
+const loadAllData = async () => {
+  await Promise.all([
+    loadTasks(),
+    loadProjects(),
+    loadActivities(),
+    loadDashboard(),
+  ]);
+};
+// ======================
+// EFFECTS
+// ======================
+useEffect(() => {
   loadProjects();
 }, []);
 
-    useEffect(() => {
-  const loadActivities = async () => {
-    try {
-      const response =
-        await activityService.getActivities();
-
-      setActivityLogs(
-        response.activities
-      );
-    } catch (error) {
-      console.error(
-        "Failed to load activities",
-        error
-      );
-    }
-  };
-
+useEffect(() => {
   loadActivities();
 }, []);
 
-    useEffect(() => {
-  const loadStats = async () => {
-    try {
-      const response =
-        await dashboardService.getStats();
-
-      console.log(
-        "Dashboard Stats:",
-        response.stats
-      );
-
-      setDashboardStats(
-        response.stats
-      );
-
-    } catch (error) {
-      console.error(
-        "Failed to load dashboard stats",
-        error
-      );
-    }
-  };
-
-  loadStats();
+useEffect(() => {
+  loadDashboard();
 }, []);
 
 useEffect(() => {
@@ -184,15 +174,6 @@ useEffect(() => {
     setTasks([]);
     return;
   }
-
-  const loadTasks = async () => {
-    try {
-      const response = await taskService.getTasks();
-      setTasks(response.tasks);
-    } catch (error) {
-      console.error(error);
-    }
-  };
 
   loadTasks();
 }, [authState.isAuthenticated]);
@@ -204,59 +185,82 @@ useEffect(() => {
   useEffect(() => {
     localStorage.setItem("pulse_last_tab", currentTab);
   }, [currentTab]);
+useEffect(() => {
+  // Automatically re-calculate overall progress
+  const projTasks = tasks.filter(
+    t => t.projectId === "proj-1"
+  );
 
-  useEffect(() => {
-    localStorage.setItem("pulse_tasks", JSON.stringify(tasks));
-    
-    // Automatically re-calculate overall progress of Mobile App Revamp dynamically when tasks change!
-    const projTasks = tasks.filter(t => t.projectId === "proj-1");
-    const completedProjTasks = projTasks.filter(t => t.status === TaskStatus.DONE);
-    const progressPercent = projTasks.length > 0 
-      ? Math.round((completedProjTasks.length / projTasks.length) * 100) 
+  const completedProjTasks = projTasks.filter(
+    t => t.status === TaskStatus.DONE
+  );
+
+  const progressPercent =
+    projTasks.length > 0
+      ? Math.round(
+          (completedProjTasks.length / projTasks.length) * 100
+        )
       : 0;
 
-    setProjects(prev => prev.map(p => {
+  setProjects(prev =>
+    prev.map(p => {
       if (p.id === "proj-1") {
-        return { ...p, progress: progressPercent };
+        return {
+          ...p,
+          progress: progressPercent,
+        };
       }
-      return p;
-    }));
-  }, [tasks]);
-  useEffect(() => {
-    localStorage.setItem("pulse_activities", JSON.stringify(activityLogs));
-  }, [activityLogs]);
 
+      return p;
+    })
+  );
+}, [tasks]);
   useEffect(() => {
     localStorage.setItem("pulse_files", JSON.stringify(projectFiles));
   }, [projectFiles]);
+// ======================
+// AUTHENTICATION
+// ======================
+const handleLoginSuccess = async (email: string) => {
+  setAuthState({
+    isAuthenticated: true,
+    isSignUpMode: false,
+    isLandingMode: false,
+    email,
+  });
 
-  useEffect(() => {
-    localStorage.setItem("pulse_notifs", JSON.stringify(notifications));
-  }, [notifications]);
+  setCurrentTab("dashboard");
 
-  // Auth Operations handlers
-  const handleLoginSuccess = (email: string) => {
-    setAuthState({
-      isAuthenticated: true,
-      isSignUpMode: false,
-      isLandingMode: false,
-      email
-    });
-    setCurrentTab("dashboard");
-  };
+  // Load all user data immediately
+  await loadAllData();
+};
 
-  const handleLogout = () => {
-    setAuthState({
-      isAuthenticated: false,
-      isSignUpMode: false,
-      isLandingMode: true,
-      email: ""
-    });
-    // Optional: Clear storage cache values to allow fresh reloads
-    localStorage.removeItem("pulse_auth");
-    localStorage.removeItem("pulse_last_tab");
-  };
+const handleLogout = () => {
+  setAuthState({
+    isAuthenticated: false,
+    isSignUpMode: false,
+    isLandingMode: true,
+    email: "",
+  });
 
+  // Clear React state
+  setTasks([]);
+  setProjects([]);
+  setActivityLogs([]);
+  setNotifications([]);
+
+  setDashboardStats({
+    totalTasks: 0,
+    completedTasks: 0,
+    activeProjects: 0,
+    completionRate: 0,
+  });
+
+  localStorage.removeItem("pulse_auth");
+  localStorage.removeItem("pulse_last_tab");
+  localStorage.removeItem("pulse_token");
+  localStorage.removeItem("pulse_user");
+};
   const handleToggleAuthMode = () => {
     setAuthState(prev => ({
       ...prev,
@@ -283,203 +287,156 @@ useEffect(() => {
     setEditingTask(task);
     setIsTaskModalOpen(true);
   };
+// ======================
+// TASK MANAGEMENT
+// ======================
+const handleSaveTask = async (
+  taskData: Omit<Task, "id" | "createdAt"> & {
+    id?: string;
+  }
+) => {
+  try {
 
-  const handleSaveTask = async (taskData: Omit<Task, "id" | "createdAt"> & { id?: string }) => {
-    const defaultUserAvatar = "https://images.unsplash.com/photo-1534528741775-53994a60daeb?auto=format&fit=crop&q=80&w=256&h=256";
-    
     if (taskData.id) {
-      // Edit operation
-      try {
-        await taskService.updateTask(
-          Number(taskData.id),
-          {
-            title: taskData.title,
-            description: taskData.description,
-            status: taskData.status,
-            priority: taskData.priority,
-          }
-        );
 
-        const response = await taskService.getTasks();
+      // =====================
+      // UPDATE TASK
+      // =====================
 
-        setTasks(response.tasks);
+      await taskService.updateTask(
+        Number(taskData.id),
+        {
+          title: taskData.title,
+          description: taskData.description,
+          status: taskData.status,
+          priority: taskData.priority,
+        }
+      );
 
-        alert("Task updated successfully!");
-      } catch (error) {
-        console.error(error);
-        alert("Failed to update task");
-        return;
-      }
-
-      // Register activity log
-      const log: ActivityLog = {
-        id: "log-" + Date.now(),
-        userId: "user-1",
-        userName: userName,
-        userAvatar: defaultUserAvatar,
-        action: "revised parameters on",
-        targetType: "task",
-        targetName: taskData.title,
-        timestamp: "Just now",
-        details: `Updated fields for sprint task: ${taskData.title}`
-      };
-      setActivityLogs(prev => [log, ...prev]);
       await activityService.createActivity({
         user_name: userName,
         action: "updated task",
         target_type: "task",
         target_name: taskData.title,
-        details: `Updated fields for sprint task: ${taskData.title}`
+        details: `Updated "${taskData.title}"`,
       });
 
     } else {
-      // Create Operation
-      try {
-        await taskService.createTask({
-          title: taskData.title,
-          description: taskData.description,
-          status: taskData.status,
-        });
 
-        const response = await taskService.getTasks();
+      // =====================
+      // CREATE TASK
+      // =====================
 
-        setTasks(response.tasks);
+      await taskService.createTask({
+        title: taskData.title,
+        description: taskData.description,
+        status: taskData.status,
+        priority: taskData.priority,
+      });
 
-        alert("Task created successfully!");
-      }
-      catch (error: any) {
-  console.error("CREATE TASK ERROR:", error);
-  console.error("RESPONSE:", error?.response?.data);
-
-  alert(
-    error?.response?.data?.message ||
-    "Failed to create task"
-  );
-}
-
-      // Register activity log
-      const log: ActivityLog = {
-        id: "log-" + Date.now(),
-        userId: "user-1",
-        userName: userName,
-        userAvatar: defaultUserAvatar,
-        action: "created task inside",
-        targetType: "task",
-        targetName: taskData.title,
-        timestamp: "Just now",
-        details: `Formulated card: ${taskData.title}. Priority set to ${taskData.priority}.`
-      };
-      setActivityLogs(prev => [log, ...prev]);
-
-      // Trigger standard system notification
-      const systemNotif: Notification = {
-        id: "notif-" + Date.now(),
-        title: "Task Registered successfully",
-        message: `Task node '${taskData.title}' has been dispatched to workspace columns.`,
-        type: "success",
-        read: false,
-        createdAt: "Now"
-      };
-      setNotifications(prev => [systemNotif, ...prev]);
-    }
-  };
-
-  const handleDeleteTask = async (id: string) => {
-    const targetTask = tasks.find(t => t.id === id);
-    if (!targetTask) return;
-
-    if (confirm(`Are you sure you want to purge task coordinate: "${targetTask.title}"?`)) {
-      try {
-        await taskService.deleteTask(Number(id));
-
-        const response = await taskService.getTasks();
-
-        setTasks(response.tasks);
-
-        alert("Task deleted successfully!");
-
-      } catch (error) {
-        console.error(error);
-        alert("Failed to delete task");
-      }
-
-      const log: ActivityLog = {
-        id: "log-" + Date.now(),
-        userId: "user-1",
-        userName: userName,
-        userAvatar:
-          "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=256&h=256",
-        action: "purged card from",
-        targetType: "task",
-        targetName: targetTask.title,
-        timestamp: "Just now",
-        details: `Successfully filtered out task ID: ${id}`
-      };
-
-      setActivityLogs(prev => [log, ...prev]);
       await activityService.createActivity({
         user_name: userName,
-        action: "deleted task",
+        action: "created task",
         target_type: "task",
-        target_name: targetTask.title,
-        details: `Deleted task: ${targetTask.title}`,
+        target_name: taskData.title,
+        details: `Created "${taskData.title}"`,
       });
+
     }
-  };
+
+    // =====================
+    // REFRESH EVERYTHING
+    // =====================
+
+    await loadTasks();
+
+    await loadDashboard();
+
+    await loadActivities();
+
+    setEditingTask(null);
+
+    setIsTaskModalOpen(false);
+
+  } catch (error) {
+
+    console.error(error);
+
+    alert("Failed to save task");
+
+  }
+};
+const handleDeleteTask = async (
+  id: number
+) => {
+  const targetTask = tasks.find(
+    t => Number(t.id) === id
+  );
+
+  if (!targetTask) return;
+
+  const confirmed = window.confirm(
+    `Delete "${targetTask.title}"?`
+  );
+
+  if (!confirmed) return;
+
+  try {
+
+    await taskService.deleteTask(id);
+
+    await activityService.createActivity({
+      user_name: userName,
+      action: "deleted task",
+      target_type: "task",
+      target_name: targetTask.title,
+      details: `Deleted "${targetTask.title}"`,
+    });
+
+    await loadTasks();
+
+    await loadDashboard();
+
+    await loadActivities();
+
+  } catch (error) {
+
+    console.error(error);
+
+    alert("Failed to delete task");
+
+  }
+};
 
 const handleUpdateTaskStatus = async (
-  id: string,
+  id: number,
   nextStatus: TaskStatus
 ) => {
   try {
     const targetTask = tasks.find(
-      (t) => String(t.id) === String(id)
+      (t) => Number(t.id) === Number(id)
     );
 
     if (!targetTask) return;
 
-    await taskService.updateTask(
-      Number(id),
-      {
-        title: targetTask.title,
-        description: targetTask.description,
-        status: nextStatus,
-        priority: targetTask.priority,
-      }
-    );
-
-    const response =
-      await taskService.getTasks();
-
-    setTasks(response.tasks);
-
-    const log: ActivityLog = {
-      id: "log-" + Date.now(),
-      userId: "user-1",
-      userName: userName,
-      userAvatar:
-        "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=256&h=256",
-      action: "shifted status of",
-      targetType: "task",
-      targetName: targetTask.title,
-      timestamp: "Just now",
-      details: `Moved card to column: ${nextStatus}`
-    };
-
-    setActivityLogs(prev => [log, ...prev]);
-    await activityService.createActivity({
-      user_name: userName,
-      action: "changed status",
-      target_type: "task",
-      target_name: targetTask.title,
-      details: `Moved to ${nextStatus}`,
+    await taskService.updateTask(id, {
+      title: targetTask.title,
+      description: targetTask.description,
+      status: nextStatus,
+      priority: targetTask.priority,
     });
+
+    // Reload everything from PostgreSQL
+    await loadTasks();
+    await loadDashboard();
+    await loadActivities();
 
   } catch (error) {
     console.error(error);
-    alert("Failed to update status");
+    alert("Failed to update task status");
   }
 };
+
 const handleToggleTaskStatusCheckbox = async (
   id: string
 ) => {
@@ -582,8 +539,9 @@ const handleToggleTaskStatusCheckbox = async (
   const handleUpdateUserNameInSettings = (name: string) => {
     setUserName(name);
   };
-
-  // Workspace subtab router renderer
+// ======================
+// RENDER HELPERS
+// ======================
   const renderTabContent = () => {
     const primaryRevampProject = projects.find(p => p.id === "proj-1") || projects[0];
 
@@ -599,6 +557,9 @@ const handleToggleTaskStatusCheckbox = async (
             onOpenTaskModal={handleOpenNewTaskModal}
           />
         );
+        // ======================
+// APPLICATION UI
+// ======================
       case "board":
         return (
           <ProjectBoardView
@@ -711,7 +672,6 @@ const handleToggleTaskStatusCheckbox = async (
         isOpen={isTaskModalOpen}
         onClose={() => setIsTaskModalOpen(false)}
         onSave={handleSaveTask}
-        teamMembers={teamMembers}
         editingTask={editingTask}
       />
 

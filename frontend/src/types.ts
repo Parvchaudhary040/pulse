@@ -4,14 +4,12 @@ export enum Priority {
   MEDIUM = "Medium",
   LOW = "Low"
 }
-
 export enum TaskStatus {
-  BACKLOG = "Backlog",
-  TODO = "Todo",
-  IN_PROGRESS = "In Progress",
-  DONE = "Done"
+  BACKLOG = "backlog",
+  TODO = "todo",
+  IN_PROGRESS = "in_progress",
+  DONE = "done",
 }
-
 export interface User {
   id: string;
   name: string;
