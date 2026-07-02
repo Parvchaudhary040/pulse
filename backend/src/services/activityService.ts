@@ -2,7 +2,7 @@ import { pool } from "../database/db";
 
 export const createActivity = async (
   activityData: {
-    user_name: string;
+    user_id: number;
     action: string;
     target_type: string;
     target_name: string;
@@ -11,19 +11,19 @@ export const createActivity = async (
 ) => {
   const result = await pool.query(
     `
-    INSERT INTO activity_logs
+    INSERT INTO activities
     (
-      user_name,
+      user_id,
       action,
       target_type,
       target_name,
       details
     )
-    VALUES ($1, $2, $3, $4, $5)
+    VALUES ($1,$2,$3,$4,$5)
     RETURNING *
     `,
     [
-      activityData.user_name,
+      activityData.user_id,
       activityData.action,
       activityData.target_type,
       activityData.target_name,
@@ -34,13 +34,19 @@ export const createActivity = async (
   return result.rows[0];
 };
 
-export const getActivities = async () => {
-  const result = await pool.query(`
+export const getActivities = async (
+  userId: number
+) => {
+  const result = await pool.query(
+    `
     SELECT *
-    FROM activity_logs
+    FROM activities
+    WHERE user_id = $1
     ORDER BY created_at DESC
     LIMIT 20
-  `);
+    `,
+    [userId]
+  );
 
   return result.rows;
 };

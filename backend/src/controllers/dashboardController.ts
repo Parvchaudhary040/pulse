@@ -7,7 +7,9 @@ export const getDashboardStats = async (
 ) => {
   try {
     const stats =
-      await dashboardService.getDashboardStats();
+      await dashboardService.getDashboardStats(
+        req.user!.id
+      );
 
     res.status(200).json({
       success: true,

@@ -7,9 +7,10 @@ export const createActivity = async (
 ) => {
   try {
     const activity =
-      await activityService.createActivity(
-        req.body
-      );
+      await activityService.createActivity({
+        ...req.body,
+        user_id: req.user!.id,
+      });
 
     res.status(201).json({
       success: true,
@@ -31,7 +32,9 @@ export const getActivities = async (
 ) => {
   try {
     const activities =
-      await activityService.getActivities();
+      await activityService.getActivities(
+        req.user!.id
+      );
 
     res.status(200).json({
       success: true,

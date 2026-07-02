@@ -9,8 +9,8 @@ interface TaskData {
 }
 
 interface UpdateTaskData {
-  title: string;
-  description: string;
+  title?: string;
+  description?: string;
   status?: string;
   priority?: string;
 }
@@ -41,7 +41,7 @@ export const createTask = async (
 };
 
 // =======================
-// Get Tasks (Current User)
+// Get Tasks
 // =======================
 export const getTasks = async (
   userId: number
@@ -91,20 +91,19 @@ export const updateTask = async (
     `
     UPDATE tasks
     SET
-    title = COALESCE($1, title),
-    description = COALESCE($2, description),
-    status = COALESCE($3, status),
-    priority = COALESCE($4, priority),
-    updated_at = NOW()
+      title = COALESCE($1, title),
+      description = COALESCE($2, description),
+      status = COALESCE($3, status),
+      priority = COALESCE($4, priority)
     WHERE id = $5
       AND user_id = $6
     RETURNING *;
     `,
     [
-      taskData.title,
-      taskData.description,
-      taskData.status ?? "todo",
-      taskData.priority ?? "medium",
+      taskData.title ?? null,
+      taskData.description ?? null,
+      taskData.status ?? null,
+      taskData.priority ?? null,
       id,
       userId,
     ]
