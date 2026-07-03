@@ -1,297 +1,498 @@
 import React, { useState } from "react";
-import { 
-  User, 
-  Lock, 
-  Bell, 
-  CreditCard, 
-  Sparkles, 
-  Settings, 
-  CloudLightning,
-  CheckCircle2,
-  AlertTriangle
+import {
+  User,
+  Bell,
+  Lock,
+  Moon,
+  LogOut,
+  Save,
 } from "lucide-react";
+
+import { useAuth } from "../context/AuthContext";
+import {
+  notifySuccess,
+  notifyInfo,
+} from "../services/notificationService";
 
 interface SettingsViewProps {
   onUpdateUserName: (name: string) => void;
 }
 
-export default function SettingsView({ onUpdateUserName }: SettingsViewProps) {
-  const [activeSubTab, setActiveSubTab] = useState<string>("profile");
-  const [nameInput, setNameInput] = useState("Alex Rivera");
-  const [bioInput, setBioInput] = useState("Lead Product Manager focused on crafting high-impact tools for modern builders.");
-  
-  // Interactive notification toggles code state
-  const [emailNotifs, setEmailNotifs] = useState(true);
-  const [securityLogs, setSecurityLogs] = useState(true);
-  const [dailyDigest, setDailyDigest] = useState(false);
+export default function SettingsView({
+  onUpdateUserName,
+}: SettingsViewProps) {
 
-  // Password fields
-  const [currentPW, setCurrentPW] = useState("");
-  const [newPW, setNewPW] = useState("");
+  const { user, logout } = useAuth();
 
-  const handleUpdateProfile = (e: React.FormEvent) => {
+  const [activeTab, setActiveTab] = useState<
+    "account" | "notifications" | "security"
+  >("account");
+
+  const [name, setName] = useState(
+    user?.name || ""
+  );
+
+  const [emailNotifications, setEmailNotifications] =
+    useState(true);
+
+  const [desktopNotifications, setDesktopNotifications] =
+    useState(true);
+
+  const [darkTheme] = useState(true);
+
+  const [currentPassword, setCurrentPassword] =
+    useState("");
+
+  const [newPassword, setNewPassword] =
+    useState("");
+
+  const handleSaveProfile = (
+    e: React.FormEvent
+  ) => {
+
     e.preventDefault();
-    if (!nameInput.trim()) {
-      alert("Name coordinate cannot be blank.");
-      return;
-    }
-    onUpdateUserName(nameInput);
-    alert("Profile parameters updated successfully inside local state!");
+
+    if (!name.trim()) return;
+
+    onUpdateUserName(name);
+
+    notifySuccess(
+      "Profile updated successfully."
+    );
+
   };
 
-  const handleUpdatePassword = (e: React.FormEvent) => {
+  const handlePassword = (
+    e: React.FormEvent
+  ) => {
+
     e.preventDefault();
-    if (!currentPW || !newPW) {
-      alert("Please fill in current and new password credentials.");
-      return;
-    }
-    alert("Security credentials refreshed successfully.");
-    setCurrentPW("");
-    setNewPW("");
+
+    notifyInfo(
+      "Password update will be connected to the backend soon."
+    );
+
+    setCurrentPassword("");
+
+    setNewPassword("");
+
   };
 
-  const menuItems = [
-    { id: "profile", label: "My Profile", icon: User },
-    { id: "security", label: "Access Security", icon: Lock },
-    { id: "notifications", label: "Notification Rules", icon: Bell },
-    { id: "billing", label: "Subscription Billing", icon: CreditCard },
+  const handleLogout = () => {
+
+    logout();
+
+    window.location.reload();
+
+  };
+
+  const tabs = [
+    {
+      id: "account",
+      label: "Account",
+      icon: User,
+    },
+    {
+      id: "notifications",
+      label: "Notifications",
+      icon: Bell,
+    },
+    {
+      id: "security",
+      label: "Security",
+      icon: Lock,
+    },
   ];
 
   return (
-    <div className="p-6 bg-[#0b0c10] text-[#f4f6fe] min-h-full selection:bg-[#4f46e5]">
-      
-      {/* Title */}
-      <div className="mb-6">
-        <h2 className="text-xl font-black text-white uppercase tracking-tight">Account Parameters & Coordinates</h2>
-        <p className="text-xs text-gray-400 font-light mt-1">
-          Coordinate local user options, security access levels, notification digests, and billing ledgers.
-        </p>
-      </div>
+    <div className="min-h-screen bg-[#0b0c10] p-8 text-white">
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 bg-[#12131a]/85 border border-gray-800 rounded-2xl overflow-hidden shadow-2xl min-h-[480px]">
-        
-        {/* Vertical subnavigation panel */}
-        <div className="md:col-span-1 border-r border-gray-800 bg-[#0e1017]/70 p-4 space-y-1 select-none">
-          {menuItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = activeSubTab === item.id;
-            return (
-              <button
-                key={item.id}
-                onClick={() => setActiveSubTab(item.id)}
-                className={`w-full flex items-center gap-3 px-3 h-10 rounded-xl text-xs font-semibold tracking-wide transition-all ${
-                  isActive 
-                    ? "bg-indigo-650/15 border border-indigo-505/25 text-white bg-indigo-600/10" 
-                    : "hover:bg-gray-900 hover:text-white border border-transparent text-gray-405"
-                }`}
-              >
-                <Icon className={`w-4 h-4 ${isActive ? "text-[#10b981]" : "text-gray-500"}`} />
-                <span>{item.label}</span>
-              </button>
-            );
-          })}
+      <h1 className="text-4xl font-black">
+        Settings
+      </h1>
+
+      <p className="text-gray-400 mt-2">
+        Manage your Pulse account preferences.
+      </p>
+
+      <div className="mt-8 grid grid-cols-12 gap-8">
+
+        {/* Sidebar */}
+
+        <div className="col-span-3">
+
+          <div className="rounded-2xl border border-gray-800 bg-[#12131a] p-3">
+
+            {tabs.map((tab) => {
+
+              const Icon = tab.icon;
+
+              return (
+
+                <button
+                  key={tab.id}
+                  onClick={() =>
+                    setActiveTab(tab.id as any)
+                  }
+                  className={`mb-2 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left transition ${
+                    activeTab === tab.id
+                      ? "bg-indigo-600 text-white"
+                      : "hover:bg-gray-800"
+                  }`}
+                >
+
+                  <Icon size={18} />
+
+                  {tab.label}
+
+                </button>
+
+              );
+
+            })}
+
+          </div>
+
         </div>
 
-        {/* Content detail panels */}
-        <div className="md:col-span-3 p-6 md:p-8 overflow-y-auto">
-          
-          {/* TAB 1: Profile Edits */}
-          {activeSubTab === "profile" && (
-            <div className="space-y-6">
-              <div className="border-b border-gray-800 pb-3">
-                <h3 className="text-sm font-extrabold text-white uppercase tracking-wide">Workspace Profile Settings</h3>
-                <p className="text-[11px] text-gray-500 font-light mt-1">These settings affect your name cards across sprint boards.</p>
-              </div>
+        {/* Content */}
 
-              <form onSubmit={handleUpdateProfile} className="space-y-4">
-                <div>
-                  <label id="profile-name-lbl" className="block text-xs font-mono uppercase tracking-widest text-gray-400 mb-1.5">Formal Full Name</label>
-                  <input
-                    id="profile-name-input"
-                    type="text"
-                    value={nameInput}
-                    onChange={(e) => setNameInput(e.target.value)}
-                    className="w-full h-11 bg-[#0b0c10] border border-gray-800 focus:outline-none focus:border-indigo-505 focus:border-indigo-500 rounded-xl px-4 text-xs text-gray-200"
+        <div className="col-span-9">
+          {/* ================= ACCOUNT ================= */}
+          {activeTab === "account" && (
+
+            <div className="rounded-2xl border border-gray-800 bg-[#12131a] p-8">
+
+              <h2 className="text-2xl font-bold mb-6">
+                Account Information
+              </h2>
+
+              <form
+                onSubmit={handleSaveProfile}
+                className="space-y-6"
+              >
+
+                {/* Avatar */}
+
+                <div className="flex items-center gap-5">
+
+                  <img
+                    src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
+                      user?.name || "User"
+                    )}&background=4f46e5&color=ffffff&size=256`}
+                    alt={user?.name}
+                    className="w-20 h-20 rounded-full border-2 border-indigo-600"
                   />
+
+                  <div>
+
+                    <h3 className="text-lg font-semibold">
+                      {user?.name}
+                    </h3>
+
+                    <p className="text-sm text-gray-400">
+                      {user?.email}
+                    </p>
+
+                  </div>
+
                 </div>
 
+                {/* Name */}
+
                 <div>
-                  <label id="profile-email-lbl" className="block text-xs font-mono uppercase tracking-widest text-gray-400 mb-1.5">Primary Email Coordinates</label>
+
+                  <label className="block mb-2 text-sm text-gray-300">
+
+                    Full Name
+
+                  </label>
+
                   <input
-                    id="profile-email-input"
-                    type="email"
-                    value="alex.rivera@pulse.io"
+                    value={name}
+                    onChange={(e) =>
+                      setName(e.target.value)
+                    }
+                    className="w-full rounded-xl border border-gray-700 bg-[#0b0c10] px-4 py-3 outline-none focus:border-indigo-500"
+                  />
+
+                </div>
+
+                {/* Email */}
+
+                <div>
+
+                  <label className="block mb-2 text-sm text-gray-300">
+
+                    Email Address
+
+                  </label>
+
+                  <input
+                    value={user?.email || ""}
                     disabled
-                    className="w-full h-11 bg-[#08090d] border border-gray-850/80 rounded-xl px-4 text-xs text-gray-500 font-mono"
+                    className="w-full rounded-xl border border-gray-700 bg-[#090a0d] px-4 py-3 text-gray-500"
                   />
-                  <span className="text-[10px] text-gray-550 text-gray-500 font-light mt-1.5 block">Managed directly by the platform administration controls.</span>
+
+                  <p className="mt-2 text-xs text-gray-500">
+
+                    Email is managed through your account.
+
+                  </p>
+
                 </div>
+
+                {/* Role */}
 
                 <div>
-                  <label id="profile-bio-lbl" className="block text-xs font-mono uppercase tracking-widest text-gray-400 mb-1.5">Formulate Bio description</label>
-                  <textarea
-                    id="profile-bio-input"
-                    rows={3}
-                    value={bioInput}
-                    onChange={(e) => setBioInput(e.target.value)}
-                    className="w-full bg-[#0b0c10] border border-gray-800 focus:outline-none focus:border-indigo-500 rounded-xl p-4 text-xs text-gray-200 resize-none leading-relaxed"
-                  />
-                </div>
 
-                <div className="pt-2">
-                  <button
-                    id="profile-save-btn"
-                    type="submit"
-                    className="h-11 px-6 rounded-xl bg-indigo-650/15 border border-indigo-505/25 text-white bg-indigo-600 hover:bg-indigo-500 text-xs font-bold transition-all shadow shadow-indigo-600/10"
-                  >
-                    Save Changes
-                  </button>
-                </div>
-              </form>
-            </div>
-          )}
+                  <label className="block mb-2 text-sm text-gray-300">
 
-          {/* TAB 2: Access Security */}
-          {activeSubTab === "security" && (
-            <div className="space-y-6">
-              <div className="border-b border-gray-800 pb-3">
-                <h3 className="text-sm font-extrabold text-white uppercase tracking-wide">Security Access phrase</h3>
-                <p className="text-[11px] text-gray-550 text-gray-500 font-light mt-1">Re-engineer credentials or authorization variables.</p>
-              </div>
+                    Role
 
-              <form onSubmit={handleUpdatePassword} className="space-y-4">
-                <div>
-                  <label className="block text-xs font-mono uppercase tracking-widest text-gray-400 mb-1.5">Current Password</label>
+                  </label>
+
                   <input
-                    type="password"
-                    placeholder="••••••••"
-                    value={currentPW}
-                    onChange={(e) => setCurrentPW(e.target.value)}
-                    className="w-full h-11 bg-[#0b0c10] border border-gray-800 focus:outline-none focus:border-indigo-500 rounded-xl px-4 text-xs text-gray-200"
+                    value="AI Engineer"
+                    disabled
+                    className="w-full rounded-xl border border-gray-700 bg-[#090a0d] px-4 py-3 text-gray-500"
                   />
+
                 </div>
 
-                <div>
-                  <label className="block text-xs font-mono uppercase tracking-widest text-gray-400 mb-1.5">New Password Node</label>
-                  <input
-                    type="password"
-                    placeholder="••••••••"
-                    value={newPW}
-                    onChange={(e) => setNewPW(e.target.value)}
-                    className="w-full h-11 bg-[#0b0c10] border border-gray-800 focus:outline-none focus:border-indigo-500 rounded-xl px-4 text-xs text-gray-200"
-                  />
+                <button
+                  type="submit"
+                  className="flex items-center gap-2 rounded-xl bg-indigo-600 px-6 py-3 font-semibold hover:bg-indigo-700"
+                >
+
+                  <Save size={18} />
+
+                  Save Changes
+
+                </button>
+
+              </form>
+
+            </div>
+
+          )}
+          {/* ================= NOTIFICATIONS ================= */}
+
+          {activeTab === "notifications" && (
+
+            <div className="rounded-2xl border border-gray-800 bg-[#12131a] p-8">
+
+              <h2 className="text-2xl font-bold mb-6">
+                Notification Preferences
+              </h2>
+
+              <div className="space-y-6">
+
+                {/* Email Notifications */}
+
+                <div className="flex items-center justify-between rounded-xl border border-gray-800 bg-[#0b0c10] p-5">
+
+                  <div>
+
+                    <h3 className="font-semibold">
+                      Email Notifications
+                    </h3>
+
+                    <p className="text-sm text-gray-400 mt-1">
+                      Receive important updates through email.
+                    </p>
+
+                  </div>
+
+                  <button
+                    onClick={() =>
+                      setEmailNotifications(
+                        !emailNotifications
+                      )
+                    }
+                    className={`w-12 h-7 rounded-full transition ${
+                      emailNotifications
+                        ? "bg-green-500"
+                        : "bg-gray-700"
+                    }`}
+                  >
+                    <div
+                      className={`w-5 h-5 rounded-full bg-white mt-1 transition-transform ${
+                        emailNotifications
+                          ? "translate-x-6"
+                          : "translate-x-1"
+                      }`}
+                    />
+                  </button>
+
                 </div>
 
-                <div className="pt-2">
+                {/* Desktop Notifications */}
+
+                <div className="flex items-center justify-between rounded-xl border border-gray-800 bg-[#0b0c10] p-5">
+
+                  <div>
+
+                    <h3 className="font-semibold">
+                      Desktop Notifications
+                    </h3>
+
+                    <p className="text-sm text-gray-400 mt-1">
+                      Show browser notifications for task updates.
+                    </p>
+
+                  </div>
+
+                  <button
+                    onClick={() =>
+                      setDesktopNotifications(
+                        !desktopNotifications
+                      )
+                    }
+                    className={`w-12 h-7 rounded-full transition ${
+                      desktopNotifications
+                        ? "bg-green-500"
+                        : "bg-gray-700"
+                    }`}
+                  >
+                    <div
+                      className={`w-5 h-5 rounded-full bg-white mt-1 transition-transform ${
+                        desktopNotifications
+                          ? "translate-x-6"
+                          : "translate-x-1"
+                      }`}
+                    />
+                  </button>
+
+                </div>
+
+                {/* Theme */}
+
+                <div className="flex items-center justify-between rounded-xl border border-gray-800 bg-[#0b0c10] p-5">
+
+                  <div>
+
+                    <div className="flex items-center gap-2">
+
+                      <Moon size={18} />
+
+                      <h3 className="font-semibold">
+                        Dark Theme
+                      </h3>
+
+                    </div>
+
+                    <p className="text-sm text-gray-400 mt-1">
+                      Pulse currently uses the dark theme.
+                    </p>
+
+                  </div>
+
+                  <span className="rounded-full bg-indigo-600 px-3 py-1 text-xs font-semibold">
+                    Enabled
+                  </span>
+
+                </div>
+
+              </div>
+
+            </div>
+          )}
+          {/* ================= SECURITY ================= */}
+
+          {activeTab === "security" && (
+
+            <div className="space-y-8">
+
+              {/* Password */}
+
+              <div className="rounded-2xl border border-gray-800 bg-[#12131a] p-8">
+
+                <h2 className="text-2xl font-bold mb-6">
+                  Security
+                </h2>
+
+                <form
+                  onSubmit={handlePassword}
+                  className="space-y-6"
+                >
+
+                  <div>
+
+                    <label className="block mb-2 text-sm text-gray-300">
+                      Current Password
+                    </label>
+
+                    <input
+                      type="password"
+                      value={currentPassword}
+                      onChange={(e) =>
+                        setCurrentPassword(
+                          e.target.value
+                        )
+                      }
+                      className="w-full rounded-xl border border-gray-700 bg-[#0b0c10] px-4 py-3 outline-none focus:border-indigo-500"
+                    />
+
+                  </div>
+
+                  <div>
+
+                    <label className="block mb-2 text-sm text-gray-300">
+                      New Password
+                    </label>
+
+                    <input
+                      type="password"
+                      value={newPassword}
+                      onChange={(e) =>
+                        setNewPassword(
+                          e.target.value
+                        )
+                      }
+                      className="w-full rounded-xl border border-gray-700 bg-[#0b0c10] px-4 py-3 outline-none focus:border-indigo-500"
+                    />
+
+                  </div>
+
                   <button
                     type="submit"
-                    className="h-11 px-6 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition-all shadow shadow-indigo-600/15"
+                    className="rounded-xl bg-indigo-600 px-6 py-3 font-semibold hover:bg-indigo-700"
                   >
-                    Refresh Credentials
+                    Update Password
                   </button>
-                </div>
-              </form>
-            </div>
-          )}
 
-          {/* TAB 3: Notifications rules */}
-          {activeSubTab === "notifications" && (
-            <div className="space-y-6">
-              <div className="border-b border-gray-800 pb-3">
-                <h3 className="text-sm font-extrabold text-white uppercase tracking-wide">Notification & Telemetry Alerts Rules</h3>
-                <p className="text-[11px] text-gray-500 font-light mt-1">Toggle live signals routing to client channels.</p>
+                </form>
+
               </div>
 
-              <div className="space-y-4">
-                {/* Rule 1 */}
-                <div className="p-4 bg-gray-900/30 border border-gray-800/80 rounded-xl flex items-center justify-between gap-4">
-                  <div className="text-left leading-tight">
-                    <span className="text-xs font-bold text-gray-200 block">Sprinting Relocation Signals</span>
-                    <span className="text-[10px] text-gray-500 font-light block mt-1">Send dispatch emails when active cards move statuses.</span>
-                  </div>
-                  <button
-                    onClick={() => setEmailNotifs(!emailNotifs)}
-                    className={`h-6 w-11 rounded-full relative p-0.5 transition-colors focus:outline-none cursor-pointer ${
-                      emailNotifs ? "bg-[#10b981]" : "bg-gray-800"
-                    }`}
-                  >
-                    <div className={`w-5 h-5 rounded-full bg-white transition-all transform ${
-                      emailNotifs ? "translate-x-5" : "translate-x-0"
-                    }`} />
-                  </button>
-                </div>
+              {/* Logout */}
 
-                {/* Rule 2 */}
-                <div className="p-4 bg-gray-900/30 border border-gray-800/80 rounded-xl flex items-center justify-between gap-4">
-                  <div className="text-left leading-tight">
-                    <span className="text-xs font-bold text-gray-200 block">System Integrity Logs</span>
-                    <span className="text-[10px] text-gray-550 text-gray-500 font-light block mt-1">Receive alerts regarding API proxy client failures.</span>
-                  </div>
-                  <button
-                    onClick={() => setSecurityLogs(!securityLogs)}
-                    className={`h-6 w-11 rounded-full relative p-0.5 transition-colors focus:outline-none cursor-pointer ${
-                      securityLogs ? "bg-[#10b981]" : "bg-gray-800"
-                    }`}
-                  >
-                    <div className={`w-5 h-5 rounded-full bg-white transition-all transform ${
-                      securityLogs ? "translate-x-5" : "translate-x-0"
-                    }`} />
-                  </button>
-                </div>
+              <div className="rounded-2xl border border-red-900 bg-[#12131a] p-8">
 
-                {/* Rule 3 */}
-                <div className="p-4 bg-gray-900/30 border border-gray-800/80 rounded-xl flex items-center justify-between gap-4">
-                  <div className="text-left leading-tight">
-                    <span className="text-xs font-bold text-gray-200 block">Daily Workspace Digests</span>
-                    <span className="text-[10px] text-gray-550 text-gray-500 font-light block mt-1">Compile and mail a layout summary of yesterday's releases.</span>
-                  </div>
-                  <button
-                    onClick={() => setDailyDigest(!dailyDigest)}
-                    className={`h-6 w-11 rounded-full relative p-0.5 transition-colors focus:outline-none cursor-pointer ${
-                      dailyDigest ? "bg-[#10b981]" : "bg-gray-800"
-                    }`}
-                  >
-                    <div className={`w-5 h-5 rounded-full bg-white transition-all transform ${
-                      dailyDigest ? "translate-x-5" : "translate-x-0"
-                    }`} />
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
+                <h2 className="text-xl font-bold text-red-400">
+                  Logout
+                </h2>
 
-          {/* TAB 4: Billing ledgers */}
-          {activeSubTab === "billing" && (
-            <div className="space-y-6">
-              <div className="border-b border-gray-800 pb-3 flex items-center justify-between">
-                <div className="text-left">
-                  <h3 className="text-sm font-extrabold text-white uppercase tracking-wide">Subscription Ledger Details</h3>
-                  <p className="text-[11px] text-gray-500 font-light mt-1">Audit current credits allocation metrics.</p>
-                </div>
-                <span className="text-[10px] tracking-wider font-mono px-2.5 py-0.5 rounded-full uppercase bg-[#10b981]/15 text-[#10b981] border border-[#10b981]/25 font-bold">
-                  ACTIVE
-                </span>
-              </div>
-
-              {/* Pro plan credit status */}
-              <div className="p-5 rounded-xl bg-gradient-to-br from-indigo-950/20 via-[#131524] to-[#161a29] border border-indigo-900/40 space-y-4">
-                <div className="flex items-center gap-2">
-                  <CloudLightning className="w-5 h-5 text-indigo-400" />
-                  <span className="text-sm font-bold text-white">Pulse Pro Node tier</span>
-                </div>
-                <p className="text-xs text-gray-400 font-light leading-relaxed">
-                  Your node workspace is preloaded with uncapped project board creations and priority queue routing. 
-                  Next auto-billing statement is scheduled on <strong className="text-white font-mono">July 21, 2026</strong> for a total parameters cost of <strong className="text-[#10b981] font-mono">$24.00</strong>.
+                <p className="mt-2 text-gray-400">
+                  Sign out from your Pulse account on this device.
                 </p>
-                <div className="w-full h-1.5 bg-gray-900 border border-gray-800 rounded-full overflow-hidden">
-                  <div className="h-full bg-indigo-500 rounded-full w-2/3" />
-                </div>
-                <div className="flex justify-between items-center text-[10px] text-gray-500 font-mono uppercase font-bold">
-                  <span>Usage: 6.5 GB / 10 GB Capacity</span>
-                  <span>65% Allocated</span>
-                </div>
+
+                <button
+                  onClick={handleLogout}
+                  className="mt-6 flex items-center gap-2 rounded-xl bg-red-600 px-6 py-3 font-semibold text-white hover:bg-red-700"
+                >
+
+                  <LogOut size={18} />
+
+                  Logout
+
+                </button>
+
               </div>
+
             </div>
+
           )}
 
         </div>
@@ -299,5 +500,7 @@ export default function SettingsView({ onUpdateUserName }: SettingsViewProps) {
       </div>
 
     </div>
+
   );
+
 }

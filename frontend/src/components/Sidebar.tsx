@@ -1,26 +1,23 @@
-import React, { useState } from "react";
-import { 
-  Menu, 
-  ChevronDown, 
+import React from "react";
+import {
   LayoutDashboard, 
   Kanban, 
   Activity, 
   User, 
   Settings, 
-  Smartphone, 
-  Circle, 
+  Smartphone,  
   LogOut,
-  FolderOpen
+  FolderOpen,
 } from "lucide-react";
 import { Project } from "../types";
 import { PulseIcon } from "./PulseLogo";
+import { useAuth } from "../context/AuthContext";
 
 interface SidebarProps {
   currentTab: string;
   setCurrentTab: (tab: string) => void;
   projects: Project[];
   activeTasksCount: number;
-  myTasksCount: number;
   onLogout: () => void;
 }
 
@@ -29,70 +26,50 @@ export default function Sidebar({
   setCurrentTab,
   projects,
   activeTasksCount,
-  myTasksCount,
   onLogout
 }: SidebarProps) {
-  const [workspace, setWorkspace] = useState("Pulse Workspace");
-  const [showWorkspaceDropdown, setShowWorkspaceDropdown] = useState(false);
-
+  const { user } = useAuth();
   const menuItems = [
     { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { id: "board", label: "Project Board", icon: Kanban, badge: activeTasksCount },
-    { id: "timeline", label: "Timeline & Activity", icon: Activity },
-    { id: "profile", label: "User Profile", icon: User },
-    { id: "settings", label: "Account Settings", icon: Settings },
-    { id: "mobile", label: "Mobile View", icon: Smartphone },
+    { id: "board", label: "Board", icon: Kanban, badge: activeTasksCount },
+    { id: "timeline", label: "Timeline", icon: Activity },
+    { id: "profile", label: "Profile", icon: User },
+    { id: "settings", label: "Settings", icon: Settings },
+    { id: "mobile", label: "Mobile", icon: Smartphone },
   ];
 
   return (
     <aside className="w-64 bg-[#0e1017] border-r border-gray-800/80 flex flex-col h-screen shrink-0 text-gray-300 select-none">
       
       {/* Workspace Selector */}
-      <div className="relative border-b border-gray-800/60 p-4">
-        <button
-          onClick={() => setShowWorkspaceDropdown(!showWorkspaceDropdown)}
-          className="w-full flex items-center justify-between p-2 rounded-xl bg-gray-900/50 hover:bg-gray-900 border border-gray-800/60 transition-all"
-        >
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-indigo-600/15 flex items-center justify-center border border-indigo-500/20">
-              <PulseIcon size="sm" />
-            </div>
-            <div className="text-left">
-              <div className="text-xs font-bold text-white leading-tight font-sans tracking-wide">Pulse Corp</div>
-              <div className="text-[10px] text-gray-500 font-mono">alex.rivera</div>
-            </div>
-          </div>
-          <ChevronDown className="w-3.5 h-3.5 text-gray-500" />
-        </button>
+      <div className="border-b border-gray-800 p-5">
 
-        {showWorkspaceDropdown && (
-          <div className="absolute left-4 right-4 top-16 bg-[#161824] border border-gray-800 rounded-xl shadow-2xl z-50 p-1 space-y-1">
-            <button
-              onClick={() => { setWorkspace("Pulse Workspace"); setShowWorkspaceDropdown(false); }}
-              className="w-full text-left p-2.5 rounded-lg text-xs hover:bg-[#20222f] hover:text-white flex items-center justify-between"
-            >
-              <span>💼 Pulse Workspace</span>
-              <Circle className="w-1.5 h-1.5 fill-emerald-500 text-emerald-500" />
-            </button>
-            <button
-              onClick={() => { setWorkspace("Alex Personal Lab"); setShowWorkspaceDropdown(false); }}
-              className="w-full text-left p-2.5 rounded-lg text-xs hover:bg-[#20222f] hover:text-white flex items-center justify-between"
-            >
-              <span>🔬 Alex Personal Lab</span>
-            </button>
-            <button
-              onClick={() => { setWorkspace("System Testing Node"); setShowWorkspaceDropdown(false); }}
-              className="w-full text-left p-2.5 rounded-lg text-xs hover:bg-[#20222f] hover:text-white flex items-center justify-between"
-            >
-              <span>🖥️ System Testing Node</span>
-            </button>
+        <div className="flex items-center gap-3">
+
+          <div className="w-11 h-11 rounded-xl bg-indigo-600 flex items-center justify-center">
+
+            <PulseIcon size="sm" />
+
           </div>
-        )}
+
+          <div>
+
+            <h2 className="text-lg font-black text-white">
+              Pulse
+            </h2>
+
+            <p className="text-xs text-gray-500">
+              Project Management
+            </p>
+
+          </div>
+
+        </div>
+
       </div>
-
       {/* Main Nav Items */}
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-        <span className="block text-[10px] font-mono tracking-widest text-gray-500 uppercase px-3 mb-2">Workspace Nodes</span>
+        <span className="block text-[10px] font-mono tracking-widest text-gray-500 uppercase px-3 mb-2">Navigation</span>
         {menuItems.map((item) => {
           const IconComponent = item.icon;
           const isActive = currentTab === item.id;
@@ -122,7 +99,7 @@ export default function Sidebar({
         {/* Dynamic Project Quicklinks */}
         <div className="pt-6">
           <div className="flex items-center justify-between px-3 mb-2">
-            <span className="block text-[10px] font-mono tracking-widest text-gray-500 uppercase">Active Streams</span>
+            <span className="block text-[10px] font-mono tracking-widest text-gray-500 uppercase">Projects</span>
             <FolderOpen className="w-3.5 h-3.5 text-gray-500" />
           </div>
           <div className="space-y-1">
@@ -146,30 +123,35 @@ export default function Sidebar({
       </nav>
 
       {/* User Footer Profile & Sign Out option */}
-      <div className="p-4 border-t border-gray-800/60 bg-[#0c0d12]">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="relative">
-              <img
-                src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=256&h=256"
-                alt="Alex Avatar"
-                className="w-8 h-8 rounded-full object-cover border border-indigo-500/30"
-              />
-              <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-[#0c0d12]" />
-            </div>
-            <div className="text-left">
-              <p className="text-xs font-bold text-white truncate max-w-[110px]">Alex Rivera</p>
-              <p className="text-[9px] font-mono text-gray-500 truncate max-w-[110px]">Lead PM</p>
-            </div>
+      <div className="border-t border-gray-800 p-5">
+
+        <div className="flex items-center gap-3">
+
+          <img
+            alt={user?.name || "User"}
+            className="w-10 h-10 rounded-full"
+          />
+
+          <div className="flex-1">
+
+            <p className="text-sm font-semibold text-white">
+              {user?.name || "Guest"}
+            </p>
+            <p className="text-xs text-gray-500">
+              {user?.email || "Not signed in"}
+            </p>
+            
           </div>
+
           <button
             onClick={onLogout}
-            title="Sign Out"
-            className="p-2 ml-1 rounded-lg hover:bg-red-950/20 hover:text-red-400 text-gray-500 transition-colors"
+            className="text-gray-400 hover:text-red-500"
           >
-            <LogOut className="w-4 h-4" />
+            <LogOut size={18} />
           </button>
+
         </div>
+
       </div>
     </aside>
   );

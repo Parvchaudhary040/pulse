@@ -1,13 +1,10 @@
 import React, { useState } from "react";
 import { 
-  Bell, 
   Search, 
-  Plus, 
-  Workflow, 
-  Sparkles, 
-  CheckCheck,
-  AlertCircle
+  Plus,
+  Bell,
 } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
 import { Notification } from "../types";
 
 interface HeaderProps {
@@ -27,22 +24,23 @@ export default function Header({
 }: HeaderProps) {
   const [showNotifPopover, setShowNotifPopover] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
+  const { user } = useAuth();
 
   // Derive title from active tab
   const getBreadcrumb = () => {
     switch (currentTab) {
       case "dashboard":
-        return "Workspace / Dashboard Analytics";
+        return "dashboard / Dashboard Analytics";
       case "board":
-        return "Streams / Mobile App Revamp / Sprint Board";
+        return "board / Mobile App Revamp / Sprint Board";
       case "timeline":
-        return "Streams / Mobile App Revamp / Timeline Activity";
+        return "timeline / Mobile App Revamp / Timeline Activity";
       case "profile":
-        return "Directory / Alex Rivera Profile";
+        return `Profile / ${user?.name ?? "User"}`;
       case "settings":
-        return "Workspace Settings / Account Dashboard";
+        return "settings / Account Dashboard";
       case "mobile":
-        return "Mobile Simulator / Vertical Device Emulation";
+        return "mobile / Vertical Device Emulation";
       default:
         return "Workspace / Coordinates";
     }
@@ -74,7 +72,7 @@ export default function Header({
             onBlur={() => setSearchFocused(false)}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
-                alert("Search action is connected to live filtering in the Sprint Board!");
+                console.log("Search:", e.currentTarget.value);
               }
             }}
             className="w-full h-8.5 bg-[#12141f] border border-gray-800/80 focus:border-indigo-500 focus:outline-none rounded-lg text-xs pl-9 pr-3 text-gray-200 placeholder-gray-500 font-light"
@@ -100,7 +98,7 @@ export default function Header({
             <div className="absolute right-0 top-11 w-80 bg-[#12131a] border border-gray-800 rounded-xl shadow-2xl z-50 overflow-hidden">
               <div className="p-4 border-b border-gray-800 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold text-white uppercase tracking-wide">Workspace Notifications</span>
+                  <span className="text-xs font-bold text-white uppercase tracking-wide">Notifications</span>
                   {unreadCount > 0 && (
                     <span className="text-[10px] bg-indigo-600 text-white font-mono rounded px-1.5 font-bold">
                       {unreadCount} NEW
@@ -112,7 +110,7 @@ export default function Header({
                     onClick={onMarkAllNotificationsRead}
                     className="text-[10px] text-indigo-400 hover:text-indigo-300 font-semibold"
                   >
-                    Clear all
+                    Mark all read
                   </button>
                 )}
               </div>
@@ -120,7 +118,7 @@ export default function Header({
               <div className="max-h-64 overflow-y-auto divide-y divide-gray-800/50">
                 {notifications.length === 0 ? (
                   <div className="p-6 text-center text-xs text-gray-505 text-gray-500 font-light">
-                    Your dynamic sandbox notifications tray is empty.
+                    No notifications yet.
                   </div>
                 ) : (
                   notifications.map((notif) => (

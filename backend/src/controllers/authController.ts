@@ -16,8 +16,26 @@ export const loginUser = async (req: Request, res: Response) => {
 };
 
 // Get Current User
-export const getCurrentUser = (req: Request, res: Response) => {
-  const result = authService.getMe();
+export const getCurrentUser = async (
+  req: Request,
+  res: Response
+) => {
+  try {
 
-  return res.status(200).json(result);
+    const result = await authService.getMe(
+      req.user!.id
+    );
+
+    return res.status(200).json(result);
+
+  } catch (error) {
+
+    console.error(error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch user",
+    });
+
+  }
 };

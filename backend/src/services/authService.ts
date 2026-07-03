@@ -90,9 +90,28 @@ export const login = async (loginData: {
 };
 
 // Get Current User
-export const getMe = () => {
+export const getMe = async (userId: number) => {
+  const result = await pool.query(
+    `
+    SELECT
+      id,
+      name,
+      email
+    FROM users
+    WHERE id = $1
+    `,
+    [userId]
+  );
+
+  if (result.rows.length === 0) {
+    return {
+      success: false,
+      message: "User not found",
+    };
+  }
+
   return {
     success: true,
-    message: "Coming soon",
+    user: result.rows[0],
   };
 };
