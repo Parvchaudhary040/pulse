@@ -1,17 +1,19 @@
 import * as activityService from "./services/activityService";
 import * as dashboardService from "./services/dashboardService";
 import * as projectService from "./services/projectService";
+import ProjectTimelinePage from "./pages/ProjectTimelinePage";
 import * as taskService from "./services/taskService";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import {
+  notifyError,
+  notifyInfo,
+} from "./services/notificationService";
 import React, { useState, useEffect } from "react";
-import { 
-  currentUser, 
-  teamMembers, 
-  projects as seedProjects, 
-  initialActivityLogs, 
-  initialProjectFiles, 
-  initialMockNotifications 
+import {
+  projects as seedProjects,
 } from "./data";
-import { Task, TaskStatus, Project, ActivityLog, ProjectFile, Notification, Priority } from "./types";
+import { Task, TaskStatus, Project, ActivityLog, Notification, Priority } from "./types";
 // Inner-components imports
 import LandingPage from "./components/LandingPage";
 import SimpleLoginSignup from "./components/SimpleLoginSignup";
@@ -19,18 +21,19 @@ import Sidebar from "./components/Sidebar";
 import Header from "./components/Header";
 import DashboardView from "./components/DashboardView";
 import ProjectBoardView from "./components/ProjectBoardView";
-import ProjectDetailView from "./components/ProjectDetailView";
 import ProfileView from "./components/ProfileView";
 import SettingsView from "./components/SettingsView";
 import MobileSimulator from "./components/MobileSimulator";
 import TaskModal from "./components/TaskModal";
+import { useAuth } from "./context/AuthContext";
 // ======================
 // APP COMPONENT
 // ======================
 export default function App() {
-  // ======================
+// ======================
 // APPLICATION STATE
 // ======================
+  const { user } = useAuth();
   const [dashboardStats, setDashboardStats] =
   useState({
     totalTasks: 0,
@@ -71,17 +74,6 @@ export default function App() {
   // Load / Persist Activities
   const [activityLogs, setActivityLogs] = useState<ActivityLog[]>([]);
 
-  // Load / Persist Files lists
-  const [projectFiles, setProjectFiles] = useState<ProjectFile[]>(() => {
-    const saved = localStorage.getItem("pulse_files");
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {}
-    }
-    return initialProjectFiles;
-  });
-
   // Load / Persist Alerts
   const [notifications, setNotifications] = useState<Notification[]>([]);
   // Task Creator Modal indicators
@@ -96,11 +88,11 @@ export default function App() {
     try {
       return JSON.parse(savedUser).name;
     } catch {
-      return "Alex Rivera";
+      return "User";
     }
   }
 
-  return "Alex Rivera";
+  return "User";
 });
 
 // ======================
@@ -215,9 +207,6 @@ useEffect(() => {
     })
   );
 }, [tasks]);
-  useEffect(() => {
-    localStorage.setItem("pulse_files", JSON.stringify(projectFiles));
-  }, [projectFiles]);
 // ======================
 // AUTHENTICATION
 // ======================
@@ -353,6 +342,7 @@ const handleSaveTask = async (
     await loadDashboard();
 
     await loadActivities();
+    notifyInfo("Task status updated.");
 
     setEditingTask(null);
 
@@ -362,7 +352,7 @@ const handleSaveTask = async (
 
     console.error(error);
 
-    alert("Failed to save task");
+    notifyError("Failed to save task");
 
   }
 };
@@ -398,12 +388,13 @@ const handleDeleteTask = async (
     await loadDashboard();
 
     await loadActivities();
+    notifyInfo("Task status updated.");
 
   } catch (error) {
 
     console.error(error);
 
-    alert("Failed to delete task");
+    notifyError("Failed to delete task");
 
   }
 };
@@ -430,10 +421,11 @@ const handleUpdateTaskStatus = async (
     await loadTasks();
     await loadDashboard();
     await loadActivities();
+    notifyInfo("Task status updated.");
 
   } catch (error) {
     console.error(error);
-    alert("Failed to update task status");
+    notifyError("Failed to update task status");
   }
 };
 
@@ -490,7 +482,7 @@ const handleToggleTaskStatusCheckbox = async (
 
   } catch (error) {
     console.error(error);
-    alert("Failed to update task status");
+    notifyError("Failed to update task status");
   }
 };
   // Activity additions: posting milestone logs
@@ -508,34 +500,6 @@ const handleToggleTaskStatusCheckbox = async (
     };
     setActivityLogs(prev => [newLog, ...prev]);
   };
-
-  // Doc items upload appender
-  const handleUploadProjectFile = (filename: string, filesize: string) => {
-    const newFile: ProjectFile = {
-      id: "file-" + Date.now(),
-      name: filename,
-      size: filesize,
-      uploadedBy: userName,
-      uploadedAt: "Today",
-      type: filename.endsWith(".xlsx") || filename.endsWith(".csv") ? "spreadsheet" : "code"
-    };
-    setProjectFiles(prev => [newFile, ...prev]);
-
-    // Append log
-    const log: ActivityLog = {
-      id: "log-" + Date.now(),
-      userId: "user-1",
-      userName: userName,
-      userAvatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=256&h=256",
-      action: "attached project file",
-      targetType: "project",
-      targetName: filename,
-      timestamp: "Just now",
-      details: `Added speculative assets item: ${filename} (${filesize})`
-    };
-    setActivityLogs(p => [log, ...p]);
-  };
-
   const handleUpdateUserNameInSettings = (name: string) => {
     setUserName(name);
   };
@@ -564,7 +528,6 @@ const handleToggleTaskStatusCheckbox = async (
         return (
           <ProjectBoardView
             tasks={tasks}
-            teamMembers={teamMembers}
             onAddTask={handleOpenNewTaskModal}
             onEditTask={handleOpenEditTaskModal}
             onDeleteTask={handleDeleteTask}
@@ -572,23 +535,14 @@ const handleToggleTaskStatusCheckbox = async (
           />
         );
       case "timeline":
-        return (
-          <ProjectDetailView
-            project={primaryRevampProject}
-            teamMembers={teamMembers}
-            projectFiles={projectFiles}
-            activityLogs={activityLogs}
-            onAddActivityLog={handleAddActivityLog}
-            onUploadFile={handleUploadProjectFile}
-          />
-        );
+        return <ProjectTimelinePage />;
       case "profile":
         return (
-          <ProfileView
-            user={{ ...currentUser, name: userName }}
-            tasks={tasks}
-          />
-        );
+            <ProfileView
+              user={user!}
+              tasks={tasks}
+            />
+          );
       case "settings":
         return (
           <SettingsView
@@ -647,7 +601,6 @@ const handleToggleTaskStatusCheckbox = async (
         setCurrentTab={setCurrentTab}
         projects={projects}
         activeTasksCount={tasks.filter(t => t.status !== TaskStatus.DONE).length}
-        myTasksCount={tasks.filter(t => t.assigneeId === "user-1").length}
         onLogout={handleLogout}
       />
 
@@ -673,6 +626,15 @@ const handleToggleTaskStatusCheckbox = async (
         onClose={() => setIsTaskModalOpen(false)}
         onSave={handleSaveTask}
         editingTask={editingTask}
+      />
+      {/* Toast Notifications */}
+      <ToastContainer
+        position="top-right"
+        autoClose={2500}
+        newestOnTop
+        closeOnClick
+        pauseOnHover
+        theme="dark"
       />
 
     </div>

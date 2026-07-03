@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Eye, EyeOff, Lock, Mail, ArrowRight, Github, Chrome } from "lucide-react";
 import PulseLogo from "./PulseLogo";
 import * as authService from "../services/authService";
+import { notifyInfo } from "../services/notificationService";
 
 interface SimpleLoginSignupProps {
   initialIsSignUp?: boolean;
@@ -53,7 +54,7 @@ try {
     });
 
     if (response.success) {
-      alert("Registration Successful! Please login.");
+      notifySuccess("Account created successfully!");
       setIsSignUp(false);
     } else {
       setError(response.message);
@@ -170,7 +171,7 @@ else {
             <div className="flex justify-between items-center mb-1.5">
               <label id="label-password" className="block text-xs font-mono uppercase tracking-widest text-gray-400">Security Phrase</label>
               {!isSignUp && (
-                <a href="#reset" onClick={(e) => { e.preventDefault(); alert("Demo password reset initiated."); }} className="text-[10px] text-gray-500 hover:text-indigo-400 transition-colors">
+                <a href="#reset" onClick={(e) => { e.preventDefault(); notifyInfo("Demo password reset initiated."); }} className="text-[10px] text-gray-500 hover:text-indigo-400 transition-colors">
                   Forgotten?
                 </a>
               )}

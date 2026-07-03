@@ -12,6 +12,5 @@ export const createActivity = async (
     "/activities",
     activityData
   );
-
   return response.data;
 };
