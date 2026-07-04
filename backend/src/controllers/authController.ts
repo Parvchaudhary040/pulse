@@ -1,41 +1,101 @@
 import { Request, Response } from "express";
 import * as authService from "../services/authService";
 
-// Register User
-export const registerUser = async (req: Request, res: Response) => {
-  const result = await authService.register(req.body);
+interface AuthRequest extends Request {
+  user?: {
+    id: number;
+  };
+}
 
-  return res.status(201).json(result);
-};
+// ==============================
+// Register
+// ==============================
 
-// Login User
-export const loginUser = async (req: Request, res: Response) => {
-  const result = await authService.login(req.body);
-
-  return res.status(200).json(result);
-};
-
-// Get Current User
-export const getCurrentUser = async (
+export const registerUser = async (
   req: Request,
   res: Response
 ) => {
-  try {
 
-    const result = await authService.getMe(
-      req.user!.id
-    );
+  const result = await authService.register(
+    req.body
+  );
 
-    return res.status(200).json(result);
+  if (!result.success) {
+    return res.status(400).json(result);
+  }
 
-  } catch (error) {
+  return res.status(201).json(result);
 
-    console.error(error);
+};
 
-    return res.status(500).json({
-      success: false,
-      message: "Failed to fetch user",
+// ==============================
+// Login
+// ==============================
+
+export const loginUser = async (
+  req: Request,
+  res: Response
+) => {
+
+  const result = await authService.login(
+    req.body
+  );
+
+  if (!result.success) {
+    return res.status(401).json(result);
+  }
+
+  return res.status(200).json(result);
+
+};
+
+// ==============================
+// Current User
+// ==============================
+
+export const getCurrentUser = async (
+  req: AuthRequest,
+  res: Response
+) => {
+
+  const result = await authService.getMe(
+    req.user!.id
+  );
+
+  if (!result.success) {
+    return res.status(404).json(result);
+  }
+
+  return res.status(200).json(result);
+
+};
+
+// ==============================
+// Change Password
+// ==============================
+
+export const changePassword = async (
+  req: AuthRequest,
+  res: Response
+) => {
+
+  const result =
+    await authService.changePassword({
+
+      userId: req.user!.id,
+
+      currentPassword:
+        req.body.currentPassword,
+
+      newPassword:
+        req.body.newPassword,
+
     });
 
+  if (!result.success) {
+    return res.status(400).json(result);
   }
+
+  return res.status(200).json(result);
+
 };
