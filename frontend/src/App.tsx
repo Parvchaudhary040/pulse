@@ -3,6 +3,7 @@ import * as dashboardService from "./services/dashboardService";
 import * as projectService from "./services/projectService";
 import ProjectTimelinePage from "./pages/ProjectTimelinePage";
 import * as taskService from "./services/taskService";
+import { useTheme } from "./context/ThemeContext";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import {
@@ -34,6 +35,7 @@ export default function App() {
 // APPLICATION STATE
 // ======================
   const { user } = useAuth();
+  const { theme } = useTheme();
   const [dashboardStats, setDashboardStats] =
   useState({
     totalTasks: 0,
@@ -593,8 +595,13 @@ const handleToggleTaskStatusCheckbox = async (
 
   // Active platform layout
   return (
-    <div className="flex bg-[#0b0c10] text-[#f4f6fe] h-screen overflow-hidden font-sans select-none antialiased selection:bg-[#4f46e5] selection:text-white">
-      
+    <div
+      className={`flex h-screen overflow-hidden font-sans transition-colors duration-300 ${
+        theme === "dark"
+          ? "bg-app text-[#f4f6fe]"
+          : "bg-gray-100 text-gray-900"
+      }`}
+    >
       {/* 1. Left Navigation Navigation panel */}
       <Sidebar
         currentTab={currentTab}
@@ -615,7 +622,7 @@ const handleToggleTaskStatusCheckbox = async (
         />
 
         {/* Real Content Scrolling Panel */}
-        <main className="flex-1 overflow-y-auto bg-[#0b0c10]">
+        <main className="flex-1 overflow-y-auto bg-app">
           {renderTabContent()}
         </main>
       </div>

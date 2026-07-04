@@ -40,26 +40,28 @@ export default function MobileSimulator({ tasks, onToggleTaskStatus }: MobileSim
   };
 
   return (
-    <div className="p-6 bg-[#0b0c10] text-[#f4f6fe] min-h-full flex flex-col items-center justify-center selection:bg-[#4f46e5]">
+    <div className="p-6 bg-app text-[#f4f6fe] min-h-full flex flex-col items-center justify-center selection:bg-[#4f46e5]">
       
       {/* Intro info heading */}
       <div className="text-center max-w-md mb-8">
-        <h2 className="text-xl font-black text-white uppercase tracking-tight">Interactive Mobile Sandbox</h2>
-        <p className="text-xs text-gray-400 font-light mt-1">
+        <h2 className="text-xl font-black text-primary uppercase tracking-tight">Interactive Mobile Sandbox</h2>
+        <p className="text-xs text-secondary font-light mt-1">
           Monitor exactly how the custom "Pulse Dashboard" responsive rules operate on compact viewport view models. Complete operations below inside our mock hardware wrapper.
         </p>
       </div>
 
       {/* Tactile Smartphone Hardware bezel container */}
-      <div className="w-[320px] h-[640px] bg-[#0c0d12] border-[10px] border-gray-900 rounded-[44px] shadow-2xl relative overflow-hidden flex flex-col justify-between ring-4 ring-indigo-950/40">
+      <div className="w-[340px] h-[700px] bg-surface border-[10px] bg-surface-2
+hover:bg-indigo-100
+border border-default rounded-[44px] shadow-2xl relative overflow-hidden flex flex-col justify-between ring-4 ring-indigo-950/40">
         
         {/* Notch / Speaker bar & StatusBar indicators */}
-        <div className="bg-[#0c0d12] h-9 pt-1 px-5 flex justify-between items-center text-[10px] font-mono text-gray-500 select-none z-30">
-          <span>9:41</span>
+        <div className="bg-surface h-9 pt-1 px-5 flex justify-between items-center text-[10px] font-mono text-secondary select-none z-30">
+          <span>09:41</span>
           {/* Dynamic Mock physical notch */}
-          <div className="w-24 h-4 bg-gray-900 absolute left-1/2 -translate-x-1/2 rounded-full top-2 border border-gray-800/20" />
+          <div className="w-24 h-4 bg-surface-2 absolute left-1/2 -translate-x-1/2 rounded-full top-2 border border-default/20" />
           <div className="flex items-center gap-1.5">
-            <Wifi className="w-3 h-3 text-gray-505 text-gray-500" />
+            <Wifi className="w-3 h-3 text-gray-505 text-secondary" />
             <Battery className="w-3.5 h-3.5 text-gray-450 text-[#10b981]" />
           </div>
         </div>
@@ -74,10 +76,10 @@ export default function MobileSimulator({ tasks, onToggleTaskStatus }: MobileSim
               {/* Header section with notification bubble */}
               <div className="flex items-center justify-between pb-2">
                 <div className="text-left leading-tight">
-                  <span className="text-[9px] font-mono text-gray-500 uppercase tracking-widest block font-bold">Morning, Alex</span>
-                  <h3 className="text-base font-black text-white uppercase tracking-tight">Active Node</h3>
+                  <span className="text-[9px] font-mono text-secondary uppercase tracking-widest block font-bold">Good Morning 👋 Alex Rivera 2 Tasks due today</span>
+                  <h3 className="text-base font-black text-primary uppercase tracking-tight">Active Node</h3>
                 </div>
-                <button className="p-1 px-1.5 rounded-lg bg-gray-900 border border-gray-805 text-gray-400 relative">
+                <button className="p-1 px-1.5 rounded-lg bg-surface-2 border border-gray-805 text-secondary relative">
                   <Bell className="w-3.5 h-3.5" />
                   <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 bg-indigo-500 rounded-full" />
                 </button>
@@ -86,30 +88,30 @@ export default function MobileSimulator({ tasks, onToggleTaskStatus }: MobileSim
               {/* Horizontal scroll statistic badges */}
               <div className="flex gap-2.5 overflow-x-auto pb-1.5 scrollbar-none snap-x -mx-4.5 px-4.5">
                 {/* Badge 1 */}
-                <div className="p-3 bg-gray-900 border border-gray-800/80 rounded-xl min-w-[120px] shrink-0 snap-center text-left space-y-1">
-                  <span className="text-[8px] font-mono text-gray-500 uppercase tracking-wider block leading-none font-bold">My PENDING</span>
-                  <span className="text-lg font-black text-white leading-none block">{activeAlexTasks.length} Cards</span>
+                <div className="p-3 bg-surface-2 border border-default/80 rounded-xl min-w-[120px] shrink-0 snap-center text-left space-y-1">
+                  <span className="text-[8px] font-mono text-secondary uppercase tracking-wider block leading-none font-bold">My PENDING</span>
+                  <span className="text-lg font-black text-primary leading-none block">{activeAlexTasks.length} Cards</span>
                   <span className="text-[8px] text-[#10b981] block">Synchronized core</span>
                 </div>
                 {/* Badge 2 */}
                 <div className="p-3 bg-gradient-to-br from-[#12131a] to-indigo-950/20 border border-indigo-900/30 rounded-xl min-w-[120px] shrink-0 snap-center text-left space-y-1">
                   <span className="text-[8px] font-mono text-indigo-400 uppercase tracking-wider block leading-none font-bold">WEEKLY COMPLETES</span>
                   <span className="text-lg font-black text-indigo-300 leading-none block">+{completedAlexCount} Sprint</span>
-                  <span className="text-[8px] text-gray-500 block">Pulse benchmark</span>
+                  <span className="text-[8px] text-secondary block">Pulse benchmark</span>
                 </div>
                 {/* Badge 3 */}
-                <div className="p-3 bg-gray-900 border border-gray-800/80 rounded-xl min-w-[120px] shrink-0 snap-center text-left space-y-1">
-                  <span className="text-[8px] font-mono text-gray-500 uppercase tracking-wider block leading-none font-bold">STREAMS COUNT</span>
-                  <span className="text-lg font-black text-white leading-none block">3 Targets</span>
-                  <span className="text-[8px] text-gray-550 text-gray-500 block">Mobile App Revamp</span>
+                <div className="p-3 bg-surface-2 border border-default/80 rounded-xl min-w-[120px] shrink-0 snap-center text-left space-y-1">
+                  <span className="text-[8px] font-mono text-secondary uppercase tracking-wider block leading-none font-bold">STREAMS COUNT</span>
+                  <span className="text-lg font-black text-primary leading-none block">3 Targets</span>
+                  <span className="text-[8px] text-gray-550 text-secondary block">Mobile App Revamp</span>
                 </div>
               </div>
 
               {/* Sparkline line widget */}
-              <div className="p-3.5 rounded-xl bg-gray-900/70 border border-gray-850/60 flex items-center justify-between gap-4">
+              <div className="p-3.5 rounded-xl bg-surface-2/70 border border-gray-850/60 flex items-center justify-between gap-4">
                 <div className="text-left space-y-0.5">
-                  <span className="text-[8px] font-mono text-gray-550 text-gray-500 uppercase tracking-wider block font-bold">Sprinting metrics</span>
-                  <span className="text-xs font-bold text-white block">Completion progress</span>
+                  <span className="text-[8px] font-mono text-gray-550 text-secondary uppercase tracking-wider block font-bold">Sprinting metrics</span>
+                  <span className="text-xs font-bold text-primary block">Completion progress</span>
                   <span className="text-[9px] text-[#10b981] font-semibold block mt-1">+18.4% Week ratio</span>
                 </div>
                 {/* Simple Sparkline visual */}
@@ -121,10 +123,10 @@ export default function MobileSimulator({ tasks, onToggleTaskStatus }: MobileSim
               {/* Alex tasks checklists */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between pb-1">
-                  <span className="text-[9px] font-mono text-gray-500 uppercase tracking-widest font-bold">Priority Tasks</span>
+                  <span className="text-[9px] font-mono text-secondary uppercase tracking-widest font-bold">Priority Tasks</span>
                   <button 
                     onClick={() => alert("Please swap to full desktop view 'Project Board' node for detail creates.")}
-                    className="p-1 px-1.5 rounded-md bg-gray-900 border border-gray-805 text-[8px] font-mono text-[#10b981] font-bold flex items-center gap-0.5"
+                    className="p-1 px-1.5 rounded-md bg-surface-2 border border-gray-805 text-[8px] font-mono text-[#10b981] font-bold flex items-center gap-0.5"
                   >
                     <Plus className="w-2.5 h-2.5" /> ADD
                   </button>
@@ -137,23 +139,25 @@ export default function MobileSimulator({ tasks, onToggleTaskStatus }: MobileSim
                     </div>
                   ) : (
                     alexTasks.map((task) => (
-                      <div key={task.id} className="p-2.5 bg-gray-950 border border-gray-900 rounded-lg flex items-center justify-between gap-2">
+                      <div key={task.id} className="p-2.5 bg-surface-2 border bg-surface-2
+hover:bg-indigo-100
+border border-default rounded-lg flex items-center justify-between gap-2">
                         <div className="flex items-center gap-2 truncate text-left">
                           <button
                             onClick={() => onToggleTaskStatus(task.id)}
                             className={`w-4 h-4 rounded border flex items-center justify-center transition-all shrink-0 ${
                               task.status === TaskStatus.DONE 
-                                ? "bg-[#10b981] border-[#10b981] text-white" 
-                                : "border-gray-700 hover:border-gray-500"
+                                ? "bg-[#10b981] border-[#10b981] text-primary" 
+                                : "border-default hover:border-gray-500"
                             }`}
                           >
                             {task.status === TaskStatus.DONE && <CheckCircle2 className="w-3 h-3" />}
                           </button>
                           <div className="truncate">
                             <span className={`text-[10px] font-bold block truncate ${
-                              task.status === TaskStatus.DONE ? "line-through text-gray-600" : "text-gray-200"
+                              task.status === TaskStatus.DONE ? "line-through text-gray-600" : "text-primary"
                             }`}>{task.title}</span>
-                            <span className="text-[8px] font-mono text-gray-500 block">Due: {task.dueDate}</span>
+                            <span className="text-[8px] font-mono text-secondary block">Due: {task.dueDate}</span>
                           </div>
                         </div>
 
@@ -170,8 +174,10 @@ export default function MobileSimulator({ tasks, onToggleTaskStatus }: MobileSim
           {/* Kanban / Cards view */}
           {selectedMobileTab === "board" && (
             <div className="space-y-4 flex-1">
-              <div className="flex items-center justify-between pb-1 border-b border-gray-900">
-                <span className="text-[10px] font-mono text-gray-505 text-gray-500 uppercase font-bold">Mobile Board Revamp</span>
+              <div className="flex items-center justify-between pb-1 border-b bg-surface-2
+hover:bg-indigo-100
+border border-default">
+                <span className="text-[10px] font-mono text-gray-505 text-secondary uppercase font-bold">Mobile Board Revamp</span>
                 <span className="text-[9px] font-semibold bg-indigo-950/40 text-indigo-400 px-2 rounded-full border border-indigo-900/60">
                   Sprint active
                 </span>
@@ -180,18 +186,22 @@ export default function MobileSimulator({ tasks, onToggleTaskStatus }: MobileSim
               {/* Stack views of backlog, todo, in_progress in scroll */}
               <div className="space-y-3.5">
                 {tasks.slice(0, 4).map((task) => (
-                  <div key={task.id} className="p-3 bg-gray-950 border border-gray-900 rounded-xl space-y-2 text-left">
+                  <div key={task.id} className="p-3 bg-surface-2 border bg-surface-2
+hover:bg-indigo-100
+border border-default rounded-xl space-y-2 text-left">
                     <div className="flex justify-between items-start">
-                      <span className="text-[10px] font-bold text-gray-150 text-gray-200 leading-tight block truncate col-span-2 max-w-[180px]">
+                      <span className="text-[10px] font-bold text-gray-150 text-primary leading-tight block truncate col-span-2 max-w-[180px]">
                         {task.title}
                       </span>
-                      <span className={`text-[7px] font-mono font-bold px-1 rounded uppercase bg-gray-900 ${
+                      <span className={`text-[7px] font-mono font-bold px-1 rounded uppercase bg-surface-2 ${
                         task.priority === Priority.URGENT ? "text-red-400" : "text-indigo-400"
                       }`}>
                         {task.priority}
                       </span>
                     </div>
-                    <div className="flex justify-between items-center border-t border-gray-900/60 pt-2 text-[8px] font-mono text-gray-555 text-gray-500">
+                    <div className="flex justify-between items-center border-t bg-surface-2
+hover:bg-indigo-100
+border border-default/60 pt-2 text-[8px] font-mono text-gray-555 text-secondary">
                       <span>Status: <strong className="text-gray-300">{task.status}</strong></span>
                       <span>{task.dueDate}</span>
                     </div>
@@ -214,17 +224,19 @@ export default function MobileSimulator({ tasks, onToggleTaskStatus }: MobileSim
               </div>
 
               <div className="space-y-0.5">
-                <h4 className="text-sm font-black text-white uppercase tracking-tight">Alex Rivera</h4>
-                <p className="text-[9px] font-mono text-gray-450 text-gray-400 font-semibold uppercase">Lead Product Manager</p>
+                <h4 className="text-sm font-black text-primary uppercase tracking-tight">Alex Rivera</h4>
+                <p className="text-[9px] font-mono text-gray-450 text-secondary font-semibold uppercase">Lead Product Manager</p>
                 <p className="text-[9px] font-mono text-gray-600 font-light block">alex.rivera@pulse.io</p>
               </div>
 
               {/* Divider skills details */}
-              <div className="p-3.5 bg-gray-950 border border-gray-900 rounded-xl space-y-2.5">
+              <div className="p-3.5 bg-surface-2 border bg-surface-2
+hover:bg-indigo-100
+border border-default rounded-xl space-y-2.5">
                 <span className="text-[8px] font-mono text-indigo-400 uppercase tracking-widest block font-bold">Skills Portfolio</span>
                 <div className="flex flex-wrap justify-center gap-1.5">
                   {["Strategy", "Figma", "React", "Roadmap"].map((skill, rid) => (
-                    <span key={rid} className="px-1.5 py-0.5 text-[8px] font-mono bg-gray-900 border border-gray-805 text-gray-400 rounded">
+                    <span key={rid} className="px-1.5 py-0.5 text-[8px] font-mono bg-surface-2 border border-gray-805 text-secondary rounded">
                       {skill}
                     </span>
                   ))}
@@ -236,11 +248,13 @@ export default function MobileSimulator({ tasks, onToggleTaskStatus }: MobileSim
         </div>
 
         {/* Tactical interactive bottom bar */}
-        <div className="bg-[#0e1017] border-t border-gray-900 h-14 px-6 flex justify-between items-center z-30 select-none">
+        <div className="bg-surface border-t bg-surface-2
+hover:bg-indigo-100
+border border-default h-14 px-6 flex justify-between items-center z-30 select-none">
           <button
             onClick={() => setSelectedMobileTab("home")}
             className={`flex flex-col items-center gap-0.5 ${
-              selectedMobileTab === "home" ? "text-indigo-400 font-bold" : "text-gray-500 hover:text-gray-300"
+              selectedMobileTab === "home" ? "text-indigo-400 font-bold" : "text-secondary hover:text-gray-300"
             }`}
           >
             <LayoutDashboard className="w-4 h-4" />
@@ -260,7 +274,7 @@ export default function MobileSimulator({ tasks, onToggleTaskStatus }: MobileSim
           <button
             onClick={() => setSelectedMobileTab("profile")}
             className={`flex flex-col items-center gap-0.5 ${
-              selectedMobileTab === "profile" ? "text-indigo-400 font-bold" : "text-gray-500 hover:text-gray-300"
+              selectedMobileTab === "profile" ? "text-indigo-400 font-bold" : "text-secondary hover:text-gray-300"
             }`}
           >
             <User className="w-4 h-4" />

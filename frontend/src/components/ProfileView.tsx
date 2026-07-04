@@ -14,6 +14,7 @@ import {
   User as UserType,
   Task,
   TaskStatus,
+  Priority,
 } from "../types";
 
 interface ProfileViewProps {
@@ -72,11 +73,11 @@ export default function ProfileView({
     .reverse()
     .slice(0, 6);
       return (
-        <div className="min-h-screen bg-[#0b0c10] text-white p-8">
+        <div className="min-h-screen bg-app text-primary p-8">
 
           {/* Header */}
 
-          <div className="rounded-3xl border border-gray-800 bg-[#12131a] p-8">
+          <div className="rounded-3xl border border-default bg-surface p-8">
 
             <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
 
@@ -101,7 +102,7 @@ export default function ProfileView({
                   {user.name}
                 </h1>
 
-                <div className="mt-3 flex flex-wrap gap-6 text-gray-400">
+                <div className="mt-3 flex flex-wrap gap-6 text-secondary">
 
                   <div className="flex items-center gap-2">
                     <Mail size={18} />
@@ -129,14 +130,14 @@ export default function ProfileView({
 
           <div className="grid grid-cols-2 md:grid-cols-5 gap-5 mt-8">
 
-            <div className="rounded-2xl bg-[#12131a] border border-gray-800 p-5">
+            <div className="rounded-2xl bg-surface border border-default p-5">
 
               <ListTodo
                 className="text-indigo-400 mb-3"
                 size={22}
               />
 
-              <p className="text-gray-400 text-sm">
+              <p className="text-secondary text-sm">
                 Total Tasks
               </p>
 
@@ -146,14 +147,14 @@ export default function ProfileView({
 
             </div>
 
-            <div className="rounded-2xl bg-[#12131a] border border-gray-800 p-5">
+            <div className="rounded-2xl bg-surface border border-default p-5">
 
               <CheckCircle2
                 className="text-green-400 mb-3"
                 size={22}
               />
 
-              <p className="text-gray-400 text-sm">
+              <p className="text-secondary text-sm">
                 Completed
               </p>
 
@@ -163,14 +164,14 @@ export default function ProfileView({
 
             </div>
 
-            <div className="rounded-2xl bg-[#12131a] border border-gray-800 p-5">
+            <div className="rounded-2xl bg-surface border border-default p-5">
 
               <Clock3
                 className="text-yellow-400 mb-3"
                 size={22}
               />
 
-              <p className="text-gray-400 text-sm">
+              <p className="text-secondary text-sm">
                 In Progress
               </p>
 
@@ -180,14 +181,14 @@ export default function ProfileView({
 
             </div>
 
-            <div className="rounded-2xl bg-[#12131a] border border-gray-800 p-5">
+            <div className="rounded-2xl bg-surface border border-default p-5">
 
               <Layers
                 className="text-blue-400 mb-3"
                 size={22}
               />
 
-              <p className="text-gray-400 text-sm">
+              <p className="text-secondary text-sm">
                 Todo
               </p>
 
@@ -197,14 +198,14 @@ export default function ProfileView({
 
             </div>
 
-            <div className="rounded-2xl bg-[#12131a] border border-gray-800 p-5">
+            <div className="rounded-2xl bg-surface border border-default p-5">
 
               <Award
                 className="text-purple-400 mb-3"
                 size={22}
               />
 
-              <p className="text-gray-400 text-sm">
+              <p className="text-secondary text-sm">
                 Completed %
               </p>
 
@@ -221,7 +222,7 @@ export default function ProfileView({
 
             {/* Skills */}
 
-            <div className="rounded-2xl border border-gray-800 bg-[#12131a] p-6">
+            <div className="rounded-2xl border border-default bg-surface p-6">
 
               <h2 className="text-xl font-bold mb-5">
                 Skills
@@ -243,23 +244,31 @@ export default function ProfileView({
               </div>
 
             </div>
-
             {/* Recent Tasks */}
+            <div className="lg:col-span-2 rounded-2xl border border-default bg-surface p-6">
 
-            <div className="lg:col-span-2 rounded-2xl border border-gray-800 bg-[#12131a] p-6">
+              <div className="mb-6 flex items-center justify-between">
 
-              <h2 className="text-xl font-bold mb-5">
-                Recent Tasks
-              </h2>
+                <div>
+
+                  <h2 className="text-3xl font-bold text-primary">
+                    Recent Tasks
+                  </h2>
+
+                  <p className="mt-1 text-secondary">
+                    Tasks recently assigned to you.
+                  </p>
+
+                </div>
+
+              </div>
 
               <div className="space-y-4">
 
-                {recentTasks.length === 0 ? (
+                {tasks.length === 0 ? (
 
-                  <div className="text-center py-12 text-gray-500">
-
-                    No tasks available.
-
+                  <div className="rounded-2xl border border-dashed border-default p-10 text-center text-secondary">
+                    No tasks assigned yet.
                   </div>
 
                 ) : (
@@ -268,42 +277,45 @@ export default function ProfileView({
 
                     <div
                       key={task.id}
-                      className="flex items-center justify-between rounded-xl border border-gray-700 bg-[#0f1015] px-5 py-4"
+                      className="flex items-center justify-between rounded-2xl border border-default bg-surface p-5 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-lg"
                     >
 
                       <div>
 
-                        <h3 className="font-semibold text-white">
+                        <h3 className="text-lg font-semibold text-primary">
                           {task.title}
                         </h3>
 
-                        <p className="text-sm text-gray-400 mt-1">
+                        <p className="mt-1 text-sm text-secondary">
                           {task.description}
                         </p>
 
                       </div>
 
                       <div className="flex flex-col items-end gap-2">
-
                         <span
-                          className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                            task.status === TaskStatus.DONE
-                              ? "bg-green-600/20 text-green-400"
-
+                          className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                            task.status === TaskStatus.TODO
+                              ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200"
                               : task.status === TaskStatus.IN_PROGRESS
-                              ? "bg-yellow-600/20 text-yellow-400"
-
-                              : task.status === TaskStatus.TODO
-                              ? "bg-blue-600/20 text-blue-400"
-
-                              : "bg-gray-700 text-gray-300"
+                              ? "bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-200"
+                              : task.status === TaskStatus.DONE
+                              ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200"
+                              : "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300"
                           }`}
                         >
-                          {task.status.replace("_", " ")}
+                          {task.status}
                         </span>
-
                         <span
-                          className="text-xs text-indigo-300"
+                          className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                            task.priority === Priority.URGENT
+                              ? "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200"
+                              : task.priority === Priority.HIGH
+                              ? "bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-200"
+                              : task.priority === Priority.MEDIUM
+                              ? "bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-200"
+                              : "bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-200"
+                          }`}
                         >
                           {task.priority}
                         </span>
@@ -319,8 +331,8 @@ export default function ProfileView({
               </div>
 
             </div>
-
           </div>
-      </div>
-  );
+
+        </div>
+    );
 }

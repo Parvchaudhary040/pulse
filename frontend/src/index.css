@@ -1,43 +1,164 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;600&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;600&display=swap");
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Plus Jakarta Sans", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-mono: "JetBrains Mono", "Fira Code", monospace;
+  --font-sans: "Plus Jakarta Sans", "Inter", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
 }
 
-/* Custom visual system styling overrides */
-html, body {
-  background-color: #0b0c10;
-  color: #f4f6fe;
+/* ===========================
+   LIGHT THEME
+=========================== */
+
+:root {
+
+  --bg: #f5f7fb;
+
+  --surface: #ffffff;
+
+  --surface-2: #eef2ff;
+
+  --text: #111827;
+
+  --text-secondary: #6b7280;
+
+  --border: #d1d5db;
+
+  --primary: #4f46e5;
+
+}
+
+/* ===========================
+   DARK THEME
+=========================== */
+
+[data-theme="dark"] {
+
+  --bg: #0b0c10;
+
+  --surface: #12131a;
+
+  --surface-2: #1b1c24;
+
+  --text: #f4f6fe;
+
+  --text-secondary: #9ca3af;
+
+  --border: #27272a;
+
+  --primary: #6366f1;
+
+}
+
+/* ===========================
+   GLOBAL
+=========================== */
+
+html,
+body {
+
+  background: var(--bg);
+
+  color: var(--text);
+
   font-family: var(--font-sans);
+
+  transition:
+    background .25s,
+    color .25s;
+
 }
 
-/* Sleek charcoal scrollbars for modern dashboard look */
+/* ===========================
+   Reusable Utility Classes
+=========================== */
+
+.bg-app {
+
+  background: var(--bg);
+
+}
+
+.bg-surface {
+
+  background: var(--surface);
+
+}
+
+.bg-surface-2 {
+
+  background: var(--surface-2);
+
+}
+
+.text-primary {
+
+  color: var(--text);
+
+}
+
+.text-secondary {
+
+  color: var(--text-secondary);
+
+}
+
+.border-default {
+
+  border-color: var(--border);
+
+}
+
+.bg-primary {
+
+  background: var(--primary);
+
+}
+
+/* ===========================
+   Scrollbar
+=========================== */
+
 ::-webkit-scrollbar {
+
   width: 6px;
+
   height: 6px;
+
 }
 
 ::-webkit-scrollbar-track {
-  background: #0b0c10;
+
+  background: var(--bg);
+
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1f2937;
-  border-radius: 9999px;
+
+  background: var(--border);
+
+  border-radius: 999px;
+
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #374151;
+
+  background: var(--primary);
+
 }
 
-/* Hide scrollbars for simulator horizontal cards scroll */
+/* Hide Scrollbar */
+
 .scrollbar-none::-webkit-scrollbar {
+
   display: none;
-}
-.scrollbar-none {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+
 }
 
+.scrollbar-none {
+
+  -ms-overflow-style: none;
+
+  scrollbar-width: none;
+
+}

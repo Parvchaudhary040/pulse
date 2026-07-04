@@ -1,14 +1,15 @@
 import React from "react";
 import {
-  LayoutDashboard, 
-  Kanban, 
-  Activity, 
-  User, 
-  Settings, 
-  Smartphone,  
+  LayoutDashboard,
+  Kanban,
+  Activity,
+  User,
+  Settings,
+  Smartphone,
   LogOut,
   FolderOpen,
 } from "lucide-react";
+
 import { Project } from "../types";
 import { PulseIcon } from "./PulseLogo";
 import { useAuth } from "../context/AuthContext";
@@ -26,27 +27,54 @@ export default function Sidebar({
   setCurrentTab,
   projects,
   activeTasksCount,
-  onLogout
+  onLogout,
 }: SidebarProps) {
   const { user } = useAuth();
+
   const menuItems = [
-    { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { id: "board", label: "Board", icon: Kanban, badge: activeTasksCount },
-    { id: "timeline", label: "Timeline", icon: Activity },
-    { id: "profile", label: "Profile", icon: User },
-    { id: "settings", label: "Settings", icon: Settings },
-    { id: "mobile", label: "Mobile", icon: Smartphone },
+    {
+      id: "dashboard",
+      label: "Dashboard",
+      icon: LayoutDashboard,
+    },
+    {
+      id: "board",
+      label: "Board",
+      icon: Kanban,
+      badge: activeTasksCount,
+    },
+    {
+      id: "timeline",
+      label: "Timeline",
+      icon: Activity,
+    },
+    {
+      id: "profile",
+      label: "Profile",
+      icon: User,
+    },
+    {
+      id: "settings",
+      label: "Settings",
+      icon: Settings,
+    },
+    {
+      id: "mobile",
+      label: "Mobile",
+      icon: Smartphone,
+    },
   ];
 
   return (
-    <aside className="w-64 bg-[#0e1017] border-r border-gray-800/80 flex flex-col h-screen shrink-0 text-gray-300 select-none">
-      
-      {/* Workspace Selector */}
-      <div className="border-b border-gray-800 p-5">
+    <aside className="w-64 bg-surface border-r border-default flex flex-col h-screen shrink-0 text-primary transition-colors duration-300">
+
+      {/* Logo */}
+
+      <div className="border-b border-default p-5">
 
         <div className="flex items-center gap-3">
 
-          <div className="w-11 h-11 rounded-xl bg-indigo-600 flex items-center justify-center">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-600">
 
             <PulseIcon size="sm" />
 
@@ -54,12 +82,16 @@ export default function Sidebar({
 
           <div>
 
-            <h2 className="text-lg font-black text-white">
+            <h2 className="text-lg font-black text-primary">
+
               Pulse
+
             </h2>
 
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-secondary">
+
               Project Management
+
             </p>
 
           </div>
@@ -67,92 +99,182 @@ export default function Sidebar({
         </div>
 
       </div>
-      {/* Main Nav Items */}
-      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-        <span className="block text-[10px] font-mono tracking-widest text-gray-500 uppercase px-3 mb-2">Navigation</span>
-        {menuItems.map((item) => {
-          const IconComponent = item.icon;
-          const isActive = currentTab === item.id;
-          return (
-            <button
-              key={item.id}
-              onClick={() => setCurrentTab(item.id)}
-              className={`w-full flex items-center justify-between px-3 h-10 rounded-xl text-xs font-semibold tracking-wide transition-all ${
-                isActive 
-                  ? "bg-indigo-650/15 border border-indigo-500/25 text-white bg-indigo-600/10" 
-                  : "hover:bg-gray-850/60 hover:text-white hover:bg-gray-900 border border-transparent"
-              }`}
-            >
-              <div className="flex items-center gap-2.5">
-                <IconComponent className={`w-4 h-4 ${isActive ? "text-[#10b981]" : "text-gray-400"}`} />
-                <span>{item.label}</span>
-              </div>
-              {item.badge !== undefined && item.badge > 0 && (
-                <span className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-full ${isActive ? "bg-indigo-650 text-white" : "bg-gray-800 text-gray-400"}`}>
-                  {item.badge}
-                </span>
-              )}
-            </button>
-          );
-        })}
 
-        {/* Dynamic Project Quicklinks */}
-        <div className="pt-6">
-          <div className="flex items-center justify-between px-3 mb-2">
-            <span className="block text-[10px] font-mono tracking-widest text-gray-500 uppercase">Projects</span>
-            <FolderOpen className="w-3.5 h-3.5 text-gray-500" />
-          </div>
-          <div className="space-y-1">
-            {projects.map((proj) => (
+      {/* Navigation */}
+
+      <nav className="flex-1 overflow-y-auto px-3 py-4">
+
+        <span className="mb-3 block px-3 text-[10px] font-mono uppercase tracking-widest text-secondary">
+
+          Navigation
+
+        </span>
+
+        <div className="space-y-1">
+
+          {menuItems.map((item) => {
+
+            const Icon = item.icon;
+
+            const active = currentTab === item.id;
+
+            return (
+
               <button
-                key={proj.id}
-                onClick={() => setCurrentTab("board")} // Redirects beautifully to boards tab
-                className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-light text-gray-400 hover:text-white hover:bg-gray-900/40 transition-colors"
+                key={item.id}
+                onClick={() => setCurrentTab(item.id)}
+                className={`flex h-10 w-full items-center justify-between rounded-xl border px-3 text-xs font-semibold transition-all ${
+                  active
+                    ? "border-indigo-500 bg-indigo-600/15 text-primary"
+                    : "border-transparent hover:bg-surface-2"
+                }`}
               >
-                <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full" style={{ backgroundColor: proj.color }} />
-                  <span className="truncate max-w-[130px]">{proj.name}</span>
+
+                <div className="flex items-center gap-3">
+
+                  <Icon
+                    size={16}
+                    className={
+                      active
+                        ? "text-indigo-500"
+                        : "text-secondary"
+                    }
+                  />
+
+                  <span>{item.label}</span>
+
                 </div>
-                <span className="text-[9px] font-mono text-gray-500 bg-gray-800/40 px-1 py-0.5 rounded">
-                  {proj.progress}%
-                </span>
+
+                {item.badge !== undefined &&
+                  item.badge > 0 && (
+
+                    <span
+                      className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                        active
+                          ? "bg-indigo-600 text-primary"
+                          : "bg-surface-2 text-secondary"
+                      }`}
+                    >
+
+                      {item.badge}
+
+                    </span>
+
+                  )}
+
               </button>
-            ))}
-          </div>
+
+            );
+
+          })}
+
         </div>
+
+        {/* Projects */}
+
+        <div className="mt-8">
+
+          <div className="mb-3 flex items-center justify-between px-3">
+
+            <span className="text-[10px] font-mono uppercase tracking-widest text-secondary">
+
+              Projects
+
+            </span>
+
+            <FolderOpen
+              size={14}
+              className="text-secondary"
+            />
+
+          </div>
+
+          <div className="space-y-1">
+
+            {projects.map((project) => (
+
+              <button
+                key={project.id}
+                onClick={() => setCurrentTab("board")}
+                className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-xs transition hover:bg-surface-2"
+              >
+
+                <div className="flex items-center gap-2 overflow-hidden">
+
+                  <span
+                    className="h-2 w-2 rounded-full"
+                    style={{
+                      backgroundColor: project.color,
+                    }}
+                  />
+
+                  <span className="truncate text-primary">
+
+                    {project.name}
+
+                  </span>
+
+                </div>
+
+                <span className="rounded bg-surface-2 px-2 py-0.5 text-[10px] text-secondary">
+
+                  {project.progress}%
+
+                </span>
+
+              </button>
+
+            ))}
+
+          </div>
+
+        </div>
+
       </nav>
 
-      {/* User Footer Profile & Sign Out option */}
-      <div className="border-t border-gray-800 p-5">
+      {/* Footer */}
+
+      <div className="border-t border-default p-5">
 
         <div className="flex items-center gap-3">
 
           <img
-            alt={user?.name || "User"}
-            className="w-10 h-10 rounded-full"
+            src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
+              user?.name || "Guest"
+            )}&background=4f46e5&color=ffffff`}
+            alt={user?.name || "Guest"}
+            className="h-10 w-10 rounded-full"
           />
 
-          <div className="flex-1">
+          <div className="flex-1 overflow-hidden">
 
-            <p className="text-sm font-semibold text-white">
+            <p className="truncate text-sm font-semibold text-primary">
+
               {user?.name || "Guest"}
+
             </p>
-            <p className="text-xs text-gray-500">
+
+            <p className="truncate text-xs text-secondary">
+
               {user?.email || "Not signed in"}
+
             </p>
-            
+
           </div>
 
           <button
             onClick={onLogout}
-            className="text-gray-400 hover:text-red-500"
+            className="text-secondary transition hover:text-red-500"
           >
+
             <LogOut size={18} />
+
           </button>
 
         </div>
 
       </div>
+
     </aside>
   );
 }

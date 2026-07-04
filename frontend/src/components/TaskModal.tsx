@@ -85,13 +85,13 @@ export default function TaskModal({
     return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
 
-      <div className="w-full max-w-xl rounded-2xl border border-gray-800 bg-[#12131a] shadow-2xl">
+      <div className="w-full max-w-xl rounded-2xl border border-default bg-surface shadow-2xl">
 
         {/* Header */}
 
-        <div className="flex items-center justify-between border-b border-gray-800 px-6 py-5">
+        <div className="flex items-center justify-between border-b border-default px-6 py-5">
 
-          <h2 className="text-lg font-bold text-white">
+          <h2 className="text-lg font-bold text-primary">
 
             {editingTask ? "Edit Task" : "Create Task"}
 
@@ -99,7 +99,7 @@ export default function TaskModal({
 
           <button
             onClick={onClose}
-            className="rounded-lg p-2 text-gray-400 hover:bg-gray-800 hover:text-white"
+            className="rounded-lg p-2 text-secondary hover:bg-gray-800 hover:text-primary"
           >
             <X size={18} />
           </button>
@@ -137,7 +137,7 @@ export default function TaskModal({
               onChange={(e) =>
                 setTitle(e.target.value)
               }
-              className="w-full rounded-xl border border-gray-700 bg-[#0b0c10] px-4 py-3 text-white outline-none focus:border-indigo-500"
+              className="w-full rounded-xl border border-default bg-app px-4 py-3 text-primary outline-none focus:border-indigo-500"
               placeholder="Enter task title"
             />
 
@@ -159,7 +159,7 @@ export default function TaskModal({
               onChange={(e) =>
                 setDescription(e.target.value)
               }
-              className="w-full resize-none rounded-xl border border-gray-700 bg-[#0b0c10] px-4 py-3 text-white outline-none focus:border-indigo-500"
+              className="w-full resize-none rounded-xl border border-default bg-app px-4 py-3 text-primary outline-none focus:border-indigo-500"
               placeholder="Describe this task..."
             />
 
@@ -184,7 +184,7 @@ export default function TaskModal({
                     e.target.value as TaskStatus
                   )
                 }
-                className="w-full rounded-xl border border-gray-700 bg-[#0b0c10] px-4 py-3 text-white outline-none focus:border-indigo-500"
+                className="w-full rounded-xl border border-default bg-app px-4 py-3 text-primary outline-none focus:border-indigo-500"
               >
 
                 <option value={TaskStatus.BACKLOG}>
@@ -222,7 +222,7 @@ export default function TaskModal({
                     e.target.value as Priority
                   )
                 }
-                className="w-full rounded-xl border border-gray-700 bg-[#0b0c10] px-4 py-3 text-white outline-none focus:border-indigo-500"
+                className="w-full rounded-xl border border-default bg-app px-4 py-3 text-primary outline-none focus:border-indigo-500"
               >
 
                 <option value={Priority.URGENT}>
@@ -249,19 +249,19 @@ export default function TaskModal({
 
                     {/* Footer */}
 
-          <div className="flex justify-end gap-3 border-t border-gray-800 pt-5">
+          <div className="flex justify-end gap-3 border-t border-default pt-5">
 
             <button
               type="button"
               onClick={onClose}
-              className="rounded-xl border border-gray-700 px-5 py-3 text-gray-300 hover:bg-gray-800"
+              className="rounded-xl border border-default px-5 py-3 text-gray-300 hover:bg-gray-800"
             >
               Cancel
             </button>
 
             <button
               type="submit"
-              className="rounded-xl bg-indigo-600 px-6 py-3 font-semibold text-white hover:bg-indigo-700"
+              className="rounded-xl bg-indigo-600 px-6 py-3 font-semibold text-primary hover:bg-indigo-700"
             >
               {editingTask
                 ? "Save Changes"
