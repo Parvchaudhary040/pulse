@@ -24,7 +24,7 @@ import DashboardView from "./components/DashboardView";
 import ProjectBoardView from "./components/ProjectBoardView";
 import ProfileView from "./components/ProfileView";
 import SettingsView from "./components/SettingsView";
-import MobileSimulator from "./components/MobileSimulator";
+import MobilePreview from "./components/MobilePreview";
 import TaskModal from "./components/TaskModal";
 import { useAuth } from "./context/AuthContext";
 // ======================
@@ -553,8 +553,12 @@ const handleToggleTaskStatusCheckbox = async (
         );
       case "mobile":
         return (
-          <MobileSimulator
+          <MobilePreview
+            currentTab={currentTab}
+            user={user!}
             tasks={tasks}
+            projects={projects}
+            notifications={notifications}
             onToggleTaskStatus={handleToggleTaskStatusCheckbox}
           />
         );

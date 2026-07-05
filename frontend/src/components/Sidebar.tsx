@@ -60,7 +60,7 @@ export default function Sidebar({
     },
     {
       id: "mobile",
-      label: "Mobile",
+      label: "Mobile Preview",
       icon: Smartphone,
     },
   ];
