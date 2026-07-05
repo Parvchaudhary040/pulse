@@ -94,22 +94,22 @@ else {
   };
 
   return (
-    <div className="bg-[#0b0c10] text-[#f4f6fe] min-h-screen flex flex-col justify-center items-center px-6 relative selection:bg-[#4f46e5]">
+    <div className="bg-app text-[#f4f6fe] min-h-screen flex flex-col justify-center items-center px-6 relative selection:bg-[#4f46e5]">
       {/* Glow lines */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[350px] h-[350px] bg-indigo-600/10 rounded-full blur-[100px] pointer-events-none" />
 
       {/* Main card */}
-      <div className="w-full max-w-md p-8 md:p-10 rounded-2xl bg-[#12131a] border border-gray-800/80 shadow-2xl relative z-10">
+      <div className="w-full max-w-md p-8 md:p-10 rounded-2xl bg-surface border border-default/80 shadow-2xl relative z-10">
         
         {/* Brand logo */}
         <div className="flex flex-col items-center text-center mb-8">
           <div className="mb-3">
             <PulseLogo size="lg" variant="icon" />
           </div>
-          <h2 className="text-2xl font-extrabold tracking-tight text-white uppercase font-sans">
+          <h2 className="text-2xl font-extrabold tracking-tight text-primary uppercase font-sans">
             {isSignUp ? "Create Workspace Account" : "Access Pulse Dashboard"}
           </h2>
-          <p className="text-xs text-gray-400 mt-1.5 font-light max-w-xs">
+          <p className="text-xs text-secondary mt-1.5 font-light max-w-xs">
             {isSignUp 
               ? "Gain structural coordination parameters and timeline telemetry logs." 
               : "Enter your registered credentials to synchronize active sprint boards."}
@@ -138,7 +138,7 @@ else {
           
           {isSignUp && (
             <div>
-              <label id="label-fullname" className="block text-xs font-mono uppercase tracking-widest text-gray-400 mb-1.5">Full Name</label>
+              <label id="label-fullname" className="block text-xs font-mono uppercase tracking-widest text-secondary mb-1.5">Full Name</label>
               <div className="relative">
                 <input
                   id="input-fullname"
@@ -146,14 +146,14 @@ else {
                   placeholder="e.g. Alex Rivera"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  className="w-full h-11 bg-[#0b0c10] border border-gray-800 focus:border-indigo-500 focus:outline-none rounded-xl px-4 text-sm text-gray-200"
+                  className="w-full h-11 bg-app border border-default focus:border-indigo-500 focus:outline-none rounded-xl px-4 text-sm text-gray-200"
                 />
               </div>
             </div>
           )}
 
           <div>
-            <label id="label-email" className="block text-xs font-mono uppercase tracking-widest text-gray-400 mb-1.5">Email Coordinates</label>
+            <label id="label-email" className="block text-xs font-mono uppercase tracking-widest text-secondary mb-1.5">Email Coordinates</label>
             <div className="relative">
               <Mail className="absolute left-3.5 top-3.5 w-4 h-4 text-gray-500" />
               <input
@@ -162,14 +162,14 @@ else {
                 placeholder="alex.rivera@pulse.io"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full h-11 bg-[#0b0c10] border border-gray-800 focus:border-indigo-500 focus:outline-none rounded-xl pl-10 pr-4 text-sm text-gray-250 cursor-text"
+                className="w-full h-11 bg-app border border-default focus:border-indigo-500 focus:outline-none rounded-xl pl-10 pr-4 text-sm text-gray-250 cursor-text"
               />
             </div>
           </div>
 
           <div>
             <div className="flex justify-between items-center mb-1.5">
-              <label id="label-password" className="block text-xs font-mono uppercase tracking-widest text-gray-400">Security Phrase</label>
+              <label id="label-password" className="block text-xs font-mono uppercase tracking-widest text-secondary">Security Phrase</label>
               {!isSignUp && (
                 <a href="#reset" onClick={(e) => { e.preventDefault(); notifyInfo("Demo password reset initiated."); }} className="text-[10px] text-gray-500 hover:text-indigo-400 transition-colors">
                   Forgotten?
@@ -184,7 +184,7 @@ else {
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full h-11 bg-[#0b0c10] border border-gray-800 focus:border-indigo-500 focus:outline-none rounded-xl pl-10 pr-10 text-sm text-gray-200"
+                className="w-full h-11 bg-app border border-default focus:border-indigo-500 focus:outline-none rounded-xl pl-10 pr-10 text-sm text-gray-200"
               />
               <button
                 type="button"
@@ -203,9 +203,9 @@ else {
                 type="checkbox"
                 checked={agreeTerms}
                 onChange={(e) => setAgreeTerms(e.target.checked)}
-                className="w-4 h-4 accent-indigo-600 rounded border-gray-800 bg-gray-900 focus:ring-0"
+                className="w-4 h-4 accent-indigo-600 rounded border-default bg-surface-2 focus:ring-0"
               />
-              <span className="text-[11px] text-gray-400 leading-tight">
+              <span className="text-[11px] text-secondary leading-tight">
                 I authorize Pulse coordinates to lock secure cookies and accept overall team roadmap structures.
               </span>
             </div>
@@ -215,7 +215,7 @@ else {
             id="button-submit"
             type="submit"
             disabled={loading}
-            className="w-full h-11 mt-2 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm rounded-xl transition-all duration-150 flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/30 disabled:opacity-50"
+            className="w-full h-11 mt-2 bg-indigo-600 hover:bg-indigo-500 text-primary font-semibold text-sm rounded-xl transition-all duration-150 flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/30 disabled:opacity-50"
           >
             {loading ? (
               <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -229,8 +229,8 @@ else {
         </form>
 
         {/* Dynamic switcher footer */}
-        <div className="mt-8 pt-6 border-t border-gray-800/60 text-center">
-          <p className="text-xs text-gray-400">
+        <div className="mt-8 pt-6 border-t border-default/60 text-center">
+          <p className="text-xs text-secondary">
             {isSignUp ? "Already hold workspace coordinates?" : "Need separate developer nodes?"}{" "}
             <button
               id="button-toggle-mode"

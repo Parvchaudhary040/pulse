@@ -94,7 +94,7 @@ export default function TimelineView() {
 
   };
     return (
-    <div className="bg-[#0b0c10] min-h-screen p-6 text-white">
+    <div className="bg-app min-h-screen p-6 text-primary">
 
       {/* Header */}
 
@@ -106,7 +106,7 @@ export default function TimelineView() {
             TIMELINE & ACTIVITY
           </h1>
 
-          <p className="text-gray-400 mt-2">
+          <p className="text-secondary mt-2">
             Complete history of all workspace activities.
           </p>
 
@@ -130,7 +130,7 @@ export default function TimelineView() {
             setSearch(e.target.value)
           }
           placeholder="Search activity..."
-          className="w-full rounded-xl border border-gray-700 bg-[#12131a] py-3 pl-11 pr-4 outline-none focus:border-indigo-500"
+          className="w-full rounded-xl border border-default bg-surface py-3 pl-11 pr-4 outline-none focus:border-indigo-500"
         />
 
       </div>
@@ -151,7 +151,7 @@ export default function TimelineView() {
 
       {!loading && filteredActivities.length === 0 && (
 
-        <div className="rounded-xl border border-dashed border-gray-700 py-20 text-center text-gray-500">
+        <div className="rounded-xl border border-dashed border-default py-20 text-center text-gray-500">
 
           No activities found.
 
@@ -167,7 +167,7 @@ export default function TimelineView() {
 
           <div
             key={activity.id}
-            className="rounded-xl border border-gray-700 bg-[#12131a] p-5 hover:border-indigo-500 transition"
+            className="rounded-xl border border-default bg-surface p-5 hover:border-indigo-500 transition"
           >
 
             <div className="flex items-start gap-4">
@@ -182,7 +182,7 @@ export default function TimelineView() {
 
                 <div className="flex justify-between items-center">
 
-                  <h3 className="font-semibold text-white">
+                  <h3 className="font-semibold text-primary">
 
                     {activity.action}
 
@@ -204,7 +204,7 @@ export default function TimelineView() {
 
                 </p>
 
-                <p className="text-gray-400 mt-2">
+                <p className="text-secondary mt-2">
 
                   {activity.details}
 

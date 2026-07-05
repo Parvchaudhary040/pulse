@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { 
-  Search, 
-  Plus,
+import {
+  Search,
   Bell,
+  Plus,
 } from "lucide-react";
+
 import { useAuth } from "../context/AuthContext";
 import { Notification } from "../types";
 
@@ -20,141 +21,307 @@ export default function Header({
   notifications,
   onMarkNotificationRead,
   onMarkAllNotificationsRead,
-  onOpenTaskModal
+  onOpenTaskModal,
 }: HeaderProps) {
-  const [showNotifPopover, setShowNotifPopover] = useState(false);
-  const [searchFocused, setSearchFocused] = useState(false);
+
   const { user } = useAuth();
 
-  // Derive title from active tab
+  const [showNotifPopover, setShowNotifPopover] =
+    useState(false);
+
+  const [searchFocused, setSearchFocused] =
+    useState(false);
+
+  const unreadCount =
+    notifications.filter(
+      (n) => !n.read
+    ).length;
+
   const getBreadcrumb = () => {
+
     switch (currentTab) {
+
       case "dashboard":
-        return "dashboard / Dashboard Analytics";
+        return "Workspace / Dashboard";
+
       case "board":
-        return "board / Mobile App Revamp / Sprint Board";
+        return "Workspace / Project Board";
+
       case "timeline":
-        return "timeline / Mobile App Revamp / Timeline Activity";
+        return "Workspace / Timeline";
+
       case "profile":
-        return `Profile / ${user?.name ?? "User"}`;
+        return `Workspace / ${user?.name || "Profile"}`;
+
       case "settings":
-        return "settings / Account Dashboard";
+        return "Workspace / Settings";
+
       case "mobile":
-        return "mobile / Vertical Device Emulation";
+        return "Workspace / Mobile";
+
       default:
-        return "Workspace / Coordinates";
+        return "Workspace";
+
     }
+
   };
 
-  const unreadCount = notifications.filter(n => !n.read).length;
-
   return (
-    <header className="h-16 bg-[#0e1017]/85 border-b border-gray-800/60 flex items-center justify-between px-6 sticky top-0 z-40 backdrop-blur-md">
-      
-      {/* Search breadcrumb and title */}
-      <div className="flex items-center gap-4">
-        <div className="flex items-center gap-2">
-          <div className="w-2.5 h-2.5 rounded-full bg-[#10b981] animate-pulse" />
-          <span className="text-xs font-mono text-gray-400 select-none font-medium">{getBreadcrumb()}</span>
-        </div>
+
+<header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-default bg-surface/90 px-6 backdrop-blur-md transition-colors">
+
+{/* Left */}
+
+<div className="flex items-center gap-3">
+
+<div className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" />
+
+<span className="font-mono text-xs font-medium text-secondary">
+
+{getBreadcrumb()}
+
+</span>
+
+</div>
+
+{/* Right */}
+
+<div className="flex items-center gap-4">
+
+{/* Search */}
+
+<div
+className={`relative hidden transition-all duration-300 md:block ${
+searchFocused
+? "w-64"
+: "w-52"
+}`}
+>
+
+<Search
+size={15}
+className="absolute left-3 top-3 text-secondary"
+/>
+
+<input
+
+type="text"
+
+placeholder="Search tasks..."
+
+onFocus={()=>
+setSearchFocused(true)
+}
+
+onBlur={()=>
+setSearchFocused(false)
+}
+
+onKeyDown={(e)=>{
+
+if(e.key==="Enter"){
+
+console.log(
+"Searching:",
+e.currentTarget.value
+);
+
+}
+
+}}
+
+className="h-10 w-full rounded-lg border border-default bg-surface-2 pl-10 pr-12 text-sm text-primary outline-none transition-colors placeholder:text-secondary focus:border-indigo-500"
+
+/>
+
+<span
+
+className="pointer-events-none absolute right-2 top-2 rounded border border-default bg-surface px-2 py-1 text-[10px] font-bold text-secondary"
+
+>
+
+⌘K
+
+</span>
+
+</div>
+
+{/* Notification */}
+
+<div className="relative">
+
+<button
+
+onClick={()=>
+setShowNotifPopover(
+!showNotifPopover
+)
+}
+
+className="relative rounded-lg border border-default bg-surface p-2 transition hover:bg-surface-2"
+
+>
+
+<Bell
+size={18}
+className="text-secondary"
+/>
+
+{unreadCount>0 && (
+
+<span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-indigo-500 ring-2 ring-surface"/>
+
+)}
+
+</button>
+{/* Notification Popover */}
+
+{showNotifPopover && (
+
+<div className="absolute right-0 top-12 z-50 w-80 overflow-hidden rounded-2xl border border-default bg-surface shadow-2xl">
+
+  {/* Header */}
+
+  <div className="flex items-center justify-between border-b border-default p-4">
+
+    <div>
+
+      <h3 className="text-sm font-bold text-primary">
+
+        Notifications
+
+      </h3>
+
+      <p className="mt-1 text-xs text-secondary">
+
+        {unreadCount} unread notification{unreadCount !== 1 && "s"}
+
+      </p>
+
+    </div>
+
+    {unreadCount > 0 && (
+
+      <button
+
+        onClick={onMarkAllNotificationsRead}
+
+        className="text-xs font-semibold text-indigo-500 hover:text-indigo-400"
+
+      >
+
+        Mark all read
+
+      </button>
+
+    )}
+
+  </div>
+
+  {/* Notifications */}
+
+  <div className="max-h-80 overflow-y-auto divide-y divide-default">
+
+    {notifications.length === 0 ? (
+
+      <div className="p-8 text-center">
+
+        <Bell
+          size={28}
+          className="mx-auto mb-3 text-secondary"
+        />
+
+        <p className="text-sm text-secondary">
+
+          You're all caught up.
+
+        </p>
+
       </div>
 
-      {/* Action panel */}
-      <div className="flex items-center gap-4">
-        
-        {/* Command Menu Input */}
-        <div className={`relative hidden md:block transition-all duration-300 ${searchFocused ? "w-64" : "w-48"}`}>
-          <Search className="absolute left-3 top-2.5 w-3.5 h-3.5 text-gray-500" />
-          <input
-            type="text"
-            placeholder="Search tasks... (⌘K)"
-            onFocus={() => setSearchFocused(true)}
-            onBlur={() => setSearchFocused(false)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                console.log("Search:", e.currentTarget.value);
-              }
-            }}
-            className="w-full h-8.5 bg-[#12141f] border border-gray-800/80 focus:border-indigo-500 focus:outline-none rounded-lg text-xs pl-9 pr-3 text-gray-200 placeholder-gray-500 font-light"
-          />
-          <span className="absolute right-2 top-2 text-[9px] font-mono font-bold text-gray-600 bg-gray-900 border border-gray-800 px-1 rounded select-none pointer-events-none">
-            ⌘K
-          </span>
-        </div>
+    ) : (
 
-        {/* Notifications Tray Popover */}
-        <div className="relative">
-          <button
-            onClick={() => setShowNotifPopover(!showNotifPopover)}
-            className="p-2 rounded-lg bg-gray-900 hover:bg-gray-850 text-gray-400 hover:text-white border border-gray-800/80 transition-all relative"
-          >
-            <Bell className="w-4 h-4" />
-            {unreadCount > 0 && (
-              <span className="absolute top-1 right-1 w-2 h-2 bg-indigo-500 rounded-full ring-2 ring-[#0e1017]" />
-            )}
-          </button>
+      notifications.map((notification) => (
 
-          {showNotifPopover && (
-            <div className="absolute right-0 top-11 w-80 bg-[#12131a] border border-gray-800 rounded-xl shadow-2xl z-50 overflow-hidden">
-              <div className="p-4 border-b border-gray-800 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold text-white uppercase tracking-wide">Notifications</span>
-                  {unreadCount > 0 && (
-                    <span className="text-[10px] bg-indigo-600 text-white font-mono rounded px-1.5 font-bold">
-                      {unreadCount} NEW
-                    </span>
-                  )}
-                </div>
-                {unreadCount > 0 && (
-                  <button
-                    onClick={onMarkAllNotificationsRead}
-                    className="text-[10px] text-indigo-400 hover:text-indigo-300 font-semibold"
-                  >
-                    Mark all read
-                  </button>
-                )}
-              </div>
+        <button
 
-              <div className="max-h-64 overflow-y-auto divide-y divide-gray-800/50">
-                {notifications.length === 0 ? (
-                  <div className="p-6 text-center text-xs text-gray-505 text-gray-500 font-light">
-                    No notifications yet.
-                  </div>
-                ) : (
-                  notifications.map((notif) => (
-                    <div
-                      key={notif.id}
-                      onClick={() => onMarkNotificationRead(notif.id)}
-                      className={`p-3.5 text-left text-xs transition-colors cursor-pointer ${
-                        notif.read ? "bg-transparent hover:bg-gray-900/30" : "bg-indigo-950/15 hover:bg-[#161824]"
-                      }`}
-                    >
-                      <div className="flex justify-between items-start mb-1 gap-2">
-                        <span className={`font-semibold ${notif.read ? "text-gray-300" : "text-white"}`}>
-                          {notif.title}
-                        </span>
-                        <span className="text-[9px] text-gray-500 font-mono shrink-0">{notif.createdAt}</span>
-                      </div>
-                      <p className="text-[11px] text-gray-400 leading-tight font-light truncate">
-                        {notif.message}
-                      </p>
-                    </div>
-                  ))
-                )}
-              </div>
+          key={notification.id}
+
+          onClick={() =>
+            onMarkNotificationRead(
+              notification.id
+            )
+          }
+
+          className={`w-full p-4 text-left transition ${
+            notification.read
+              ? "hover:bg-surface-2"
+              : "bg-indigo-500/10 hover:bg-indigo-500/20"
+          }`}
+
+        >
+
+          <div className="flex items-start justify-between gap-3">
+
+            <div className="flex-1">
+
+              <h4 className="font-semibold text-primary">
+
+                {notification.title}
+
+              </h4>
+
+              <p className="mt-1 text-sm text-secondary">
+
+                {notification.message}
+
+              </p>
+
             </div>
-          )}
-        </div>
 
-        {/* Quick New Task Trigger */}
+            {!notification.read && (
+
+              <span className="mt-2 h-2 w-2 rounded-full bg-indigo-500"/>
+
+            )}
+
+          </div>
+
+          <p className="mt-3 text-[11px] text-secondary">
+
+            {notification.createdAt}
+
+          </p>
+
+        </button>
+
+      ))
+
+    )}
+
+  </div>
+
+</div>
+
+)}
+
+</div>
+        {/* New Task Button */}
         <button
           onClick={onOpenTaskModal}
-          className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-3.5 h-8.5 rounded-lg transition-all duration-150 flex items-center gap-1.5 shadow-lg shadow-indigo-600/25 hover:scale-[1.01]"
+          className="flex h-10 items-center gap-2 rounded-lg bg-indigo-600 px-4 text-sm font-semibold text-primary transition hover:bg-indigo-700"
         >
-          <Plus className="w-4 h-4" />
-          <span className="hidden sm:inline">New Task</span>
+          <Plus size={18} />
+
+          <span className="hidden sm:block">
+            New Task
+          </span>
         </button>
+
       </div>
+
     </header>
+
   );
+
 }
