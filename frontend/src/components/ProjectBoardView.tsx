@@ -8,7 +8,23 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { Task, TaskStatus, Priority } from "../types";
+import {
+  DndContext,
+  DragEndEvent,
+  DragOverlay,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
 
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { toast } from "react-toastify";
+import SortableTaskCard from "./SortableTaskCard";
+import DroppableColumn from "./DroppableColumn";
 const statusOrder = [
   TaskStatus.BACKLOG,
   TaskStatus.TODO,
@@ -48,6 +64,15 @@ export default function ProjectBoardView({
     t => t.status === TaskStatus.DONE
   ).length;
   const [search, setSearch] = useState("");
+  const [activeTask, setActiveTask] =
+    useState<Task | null>(null);
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 6,
+      },
+    })
+  );
 
   const columns = [
     {
@@ -100,6 +125,55 @@ export default function ProjectBoardView({
       statusOrder[nextIndex]
     );
   };
+const handleDragStart = (
+  event: any
+) => {
+
+  const task = tasks.find(
+    t => t.id.toString() === event.active.id
+  );
+
+  if (task) {
+
+    setActiveTask(task);
+
+  }
+
+};
+const handleDragEnd = (
+  event: DragEndEvent
+) => {
+  const { active, over } = event;
+
+  setActiveTask(null);
+
+  if (!over) return;
+
+  const task = tasks.find(
+    (t) => t.id.toString() === active.id
+  );
+
+  if (!task) return;
+
+  const newStatus =
+    over.id as TaskStatus;
+
+  if (task.status === newStatus) return;
+
+  onUpdateTaskStatus(
+  Number(task.id),
+  newStatus
+);
+
+toast.success(
+  `"${task.title}" moved to ${newStatus}`,
+  {
+    autoClose: 1800,
+    position: "bottom-right",
+  }
+);
+
+};
 return (
   <div className="bg-app min-h-screen p-6 text-primary">
 
@@ -206,31 +280,79 @@ return (
         </div>
 
       </div>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+      >
+      <DragOverlay>
+
+        {activeTask && (
+
+          <div
+            className="
+            w-[300px]
+            rounded-2xl
+            border
+            border-indigo-500
+            bg-surface
+            p-5
+            shadow-2xl
+            rotate-2
+            scale-105
+            opacity-95
+            "
+          >
+
+            <h3 className="text-lg font-bold">
+              {activeTask.title}
+            </h3>
+
+            <p className="mt-3 text-sm text-secondary">
+              {activeTask.description}
+            </p>
+
+            <div className="mt-4">
+
+              <span className="rounded-full bg-indigo-600 px-3 py-1 text-xs text-white">
+
+                {activeTask.priority}
+
+              </span>
+
+            </div>
+
+          </div>
+
+        )}
+
+      </DragOverlay>
       <div className="flex gap-6 overflow-x-auto pb-4">
 
         {columns.map(column => {
 
-          const filteredTasks = useMemo(() => {
-            return tasks.filter(task => {
-              const matchesStatus =
-                task.status.toLowerCase() ===
-                column.id.toLowerCase();
+          const filteredTasks = tasks.filter((task) => {
+            const matchesStatus =
+              task.status === column.id;
 
-              const matchesSearch =
-                task.title
-                  .toLowerCase()
-                  .includes(search.toLowerCase()) ||
-                task.description
-                  .toLowerCase()
-                  .includes(search.toLowerCase());
+            const matchesSearch =
+              task.title
+                .toLowerCase()
+                .includes(search.toLowerCase()) ||
+              task.description
+                .toLowerCase()
+                .includes(search.toLowerCase());
 
-              return matchesStatus && matchesSearch;
-            });
-          }, [tasks, column.id, search]);
+            return matchesStatus && matchesSearch;
+          });
           return (
-
-            <div
+            
+            <DroppableColumn
               key={column.id}
+              id={column.id}
+            >
+            <div
               className={`w-[340px] shrink-0 rounded-2xl border ${column.border} bg-surface shadow-sm p-5`}
             >
 
@@ -265,112 +387,55 @@ return (
                 {filteredTasks.length === 0 ? (
 
                   <div className="flex h-40 flex-col items-center justify-center rounded-2xl border-2 border-dashed border-default text-secondary">
-                  <div className="mb-3 text-4xl">
-                  📋
-                  </div>
-                  <p className="font-semibold">
-                  No Tasks
-                  </p>
-                  <p className="mt-1 text-sm">
-                  Create your first task
-                  </p>
+                    <div className="mb-3 text-4xl">
+                      📋
+                    </div>
+
+                    <p className="font-semibold">
+                      No Tasks
+                    </p>
+
+                    <p className="mt-1 text-sm">
+                      Create your first task
+                    </p>
                   </div>
 
                 ) : (
 
-                  filteredTasks.map(task => (
+                  <SortableContext
+                    items={filteredTasks.map((task) =>
+                      task.id.toString()
+                    )}
+                    strategy={verticalListSortingStrategy}
+                  >
 
-                    <div
-                      key={task.id}
-                      className="rounded-2xl border border-default bg-surface p-5 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-2xl hover:border-indigo-400 hover:scale-[1.02]"
-                    >
+                    {filteredTasks.map((task) => (
 
-                      <h3 className="text-lg font-semibold">
-                        {task.title}
-                      </h3>
+                      <SortableTaskCard
+                        key={task.id}
+                        task={task}
+                        onEditTask={onEditTask}
+                        onDeleteTask={onDeleteTask}
+                        moveTask={moveTask}
+                      />
 
-                      <p className="mt-3 line-clamp-2 text-sm text-secondary">
-                        {task.description}
-                      </p>
+                    ))}
 
-                      <div className="mt-5 flex items-center justify-between">
-
-                        {/* Priority */}
-
-                        <span
-                          className={`rounded-full px-3 py-1 text-xs font-semibold text-white
-                          ${
-                          task.priority === Priority.URGENT
-                          ? "bg-red-600"
-
-                          : task.priority === Priority.HIGH
-                          ? "bg-orange-500"
-
-                          : task.priority === Priority.MEDIUM
-                          ? "bg-indigo-600"
-
-                          : "bg-emerald-600"
-                          }`}
-                        >
-                          {task.priority}
-                        </span>
-
-                        {/* Action Buttons */}
-
-                        <div className="flex items-center gap-2">
-
-                          {task.status !== TaskStatus.BACKLOG && (
-                            <button
-                              onClick={() => moveTask(task, "left")}
-                              className="flex h-8 w-8 items-center justify-center rounded-lg border border-default bg-surface-2 transition hover:bg-indigo-100 dark:hover:bg-indigo-900"
-                            >
-                              <ArrowLeft size={15} />
-                            </button>
-                          )}
-
-                          {task.status !== TaskStatus.DONE && (
-                            <button
-                              onClick={() => moveTask(task, "right")}
-                              className="flex h-8 w-8 items-center justify-center rounded-lg border border-default bg-surface-2 transition hover:bg-indigo-100 dark:hover:bg-indigo-900"
-                            >
-                              <ArrowRight size={15} />
-                            </button>
-                          )}
-
-                          <button
-                            onClick={() => onEditTask(task)}
-                            className="flex h-8 w-8 items-center justify-center rounded-lg border border-default bg-blue-500 text-white transition hover:bg-blue-600"
-                          >
-                            <Edit size={15} />
-                          </button>
-
-                          <button
-                            onClick={() => onDeleteTask(Number(task.id))}
-                            className="flex h-8 w-8 items-center justify-center rounded-lg border border-default bg-red-500 text-white transition hover:bg-red-600"
-                          >
-                            <Trash2 size={15} />
-                          </button>
-
-                        </div>
-
-                      </div>
-
-                    </div>
-
-                  ))
+                  </SortableContext>
 
                 )}
 
               </div>
 
             </div>
+            </DroppableColumn>
 
           );
 
         })}
 
       </div>
-
+      </DndContext>
     </div>
   );
 }
