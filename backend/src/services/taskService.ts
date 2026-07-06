@@ -5,6 +5,10 @@ interface TaskData {
   description: string;
   status?: string;
   priority?: string;
+
+  project_id?: number | null;
+  due_date?: string | null;
+
   user_id: number;
 }
 
@@ -13,6 +17,9 @@ interface UpdateTaskData {
   description?: string;
   status?: string;
   priority?: string;
+
+  project_id?: number | null;
+  due_date?: string | null;
 }
 
 // =======================
@@ -24,16 +31,31 @@ export const createTask = async (
   const result = await pool.query(
     `
     INSERT INTO tasks
-    (title, description, status, priority, user_id)
-    VALUES ($1, $2, $3, $4, $5)
+    (
+    title,
+    description,
+    status,
+    priority,
+    project_id,
+    due_date,
+    user_id
+    )
+
+    VALUES
+    ($1,$2,$3,$4,$5,$6,$7)
+
     RETURNING *;
     `,
     [
-      taskData.title,
-      taskData.description,
-      taskData.status ?? "todo",
-      taskData.priority ?? "medium",
-      taskData.user_id,
+    taskData.title,
+    taskData.description,
+    taskData.status ?? "todo",
+    taskData.priority ?? "medium",
+
+    taskData.project_id ?? null,
+    taskData.due_date ?? null,
+
+    taskData.user_id,
     ]
   );
 
@@ -91,21 +113,35 @@ export const updateTask = async (
     `
     UPDATE tasks
     SET
-      title = COALESCE($1, title),
-      description = COALESCE($2, description),
-      status = COALESCE($3, status),
-      priority = COALESCE($4, priority)
-    WHERE id = $5
-      AND user_id = $6
+
+    title = COALESCE($1,title),
+
+    description = COALESCE($2,description),
+
+    status = COALESCE($3,status),
+
+    priority = COALESCE($4,priority),
+
+    project_id = COALESCE($5,project_id),
+
+    due_date = COALESCE($6,due_date),
+
+    updated_at = CURRENT_TIMESTAMP
+    WHERE id = $7
+      AND user_id = $8
     RETURNING *;
     `,
     [
-      taskData.title ?? null,
-      taskData.description ?? null,
-      taskData.status ?? null,
-      taskData.priority ?? null,
-      id,
-      userId,
+    taskData.title ?? null,
+    taskData.description ?? null,
+    taskData.status ?? null,
+    taskData.priority ?? null,
+
+    taskData.project_id ?? null,
+    taskData.due_date ?? null,
+
+    id,
+    userId,
     ]
   );
 

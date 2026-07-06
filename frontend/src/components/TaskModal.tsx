@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { X } from "lucide-react";
-import { Task, TaskStatus, Priority } from "../types";
+import { Task, Project, TaskStatus, Priority } from "../types";
 
 interface TaskModalProps {
   isOpen: boolean;
@@ -11,6 +11,7 @@ interface TaskModalProps {
     }
   ) => void;
   editingTask?: Task | null;
+  projects: Project[];
 }
 
 export default function TaskModal({
@@ -18,6 +19,7 @@ export default function TaskModal({
   onClose,
   onSave,
   editingTask,
+  projects,
 }: TaskModalProps) {
 
   const [title, setTitle] = useState("");
@@ -28,6 +30,12 @@ export default function TaskModal({
 
   const [priority, setPriority] =
     useState<Priority>(Priority.MEDIUM);
+  
+  const [projectId, setProjectId] =
+  useState<number | "">("");
+  
+  const [dueDate, setDueDate] =
+    useState("");
 
   const [error, setError] = useState("");
 
@@ -39,6 +47,8 @@ export default function TaskModal({
       setDescription(editingTask.description);
       setStatus(editingTask.status);
       setPriority(editingTask.priority);
+      setProjectId(editingTask.project_id ?? "");
+      setDueDate(editingTask.due_date ?? "");
 
     } else {
 
@@ -46,7 +56,8 @@ export default function TaskModal({
       setDescription("");
       setStatus(TaskStatus.TODO);
       setPriority(Priority.MEDIUM);
-
+      setProjectId("");
+      setDueDate("");
     }
 
     setError("");
@@ -77,6 +88,16 @@ export default function TaskModal({
       description,
       status,
       priority,
+
+      project_id:
+        projectId === ""
+          ? null
+          : projectId,
+
+      due_date:
+        dueDate === ""
+          ? null
+          : dueDate,
     });
 
     onClose();
@@ -165,6 +186,62 @@ export default function TaskModal({
 
           </div>
 
+          {/* Due Date */}
+          <div>
+
+            <label className="mb-2 block text-sm font-medium text-gray-300">
+              Due Date
+            </label>
+
+            <input
+              type="date"
+              value={dueDate}
+              onChange={(e) =>
+                setDueDate(e.target.value)
+              }
+              className="w-full rounded-xl border border-default bg-app px-4 py-3 text-primary outline-none focus:border-indigo-500"
+            />
+
+          </div>
+
+          {/* Project */}
+          <div>
+
+            <label className="mb-2 block text-sm font-medium text-gray-300">
+              Project
+            </label>
+
+            <select
+              value={projectId}
+              onChange={(e) =>
+                setProjectId(
+                  e.target.value === ""
+                    ? ""
+                    : Number(e.target.value)
+                )
+              }
+              className="w-full rounded-xl border border-default bg-app px-4 py-3 text-primary outline-none focus:border-indigo-500"
+            >
+
+              <option value="">
+                No Project
+              </option>
+
+              {projects.map((project) => (
+
+                <option
+                  key={project.id}
+                  value={project.id}
+                >
+                  {project.name}
+                </option>
+
+              ))}
+
+            </select>
+
+          </div>
+
           {/* Status + Priority */}
 
           <div className="grid grid-cols-2 gap-4">
@@ -247,7 +324,7 @@ export default function TaskModal({
 
           </div>
 
-                    {/* Footer */}
+          {/* Footer */}
 
           <div className="flex justify-end gap-3 border-t border-default pt-5">
 

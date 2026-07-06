@@ -73,6 +73,14 @@ export default function App() {
   const [tasks, setTasks] = useState<Task[]>([]);
   // Load / Persist Projects State
   const [projects, setProjects] = useState<Project[]>([]);
+  const [selectedProjectId, setSelectedProjectId] =
+    useState<number | null>(null);
+  const visibleTasks =
+    selectedProjectId === null
+      ? tasks
+      : tasks.filter(
+          task => task.project_id === selectedProjectId
+        );
   // Load / Persist Activities
   const [activityLogs, setActivityLogs] = useState<ActivityLog[]>([]);
 
@@ -114,12 +122,14 @@ const loadTasks = async () => {
 const loadProjects = async () => {
   try {
     const response = await projectService.getProjects();
+    console.log("Projects API Response:", response);
     setProjects(response.projects || []);
   } catch (error) {
     console.error("Failed to load projects", error);
     setProjects([]);
   }
 };
+console.log("Projects:", projects);
 
 const loadActivities = async () => {
   try {
@@ -198,7 +208,7 @@ useEffect(() => {
 
   setProjects(prev =>
     prev.map(p => {
-      if (p.id === "proj-1") {
+      if (p.id === selectedProjectId) {
         return {
           ...p,
           progress: progressPercent,
@@ -301,6 +311,9 @@ const handleSaveTask = async (
           description: taskData.description,
           status: taskData.status,
           priority: taskData.priority,
+
+          project_id: taskData.project_id,
+          due_date: taskData.due_date,
         }
       );
 
@@ -323,6 +336,8 @@ const handleSaveTask = async (
         description: taskData.description,
         status: taskData.status,
         priority: taskData.priority,
+        project_id: taskData.project_id,
+        due_date: taskData.due_date,
       });
 
       await activityService.createActivity({
@@ -509,13 +524,13 @@ const handleToggleTaskStatusCheckbox = async (
 // RENDER HELPERS
 // ======================
   const renderTabContent = () => {
-    const primaryRevampProject = projects.find(p => p.id === "proj-1") || projects[0];
+    const primaryRevampProject = projects.find(p => p.id === selectedProjectId) || projects[0];
 
     switch (currentTab) {
       case "dashboard":
         return (
           <DashboardView
-            tasks={tasks}
+            tasks={visibleTasks}
             projects={projects}
             activityLogs={activityLogs}
             dashboardStats={dashboardStats}
@@ -523,13 +538,13 @@ const handleToggleTaskStatusCheckbox = async (
             onOpenTaskModal={handleOpenNewTaskModal}
           />
         );
-        // ======================
+// ======================
 // APPLICATION UI
 // ======================
       case "board":
         return (
           <ProjectBoardView
-            tasks={tasks}
+            tasks={visibleTasks}
             onAddTask={handleOpenNewTaskModal}
             onEditTask={handleOpenEditTaskModal}
             onDeleteTask={handleDeleteTask}
@@ -542,7 +557,7 @@ const handleToggleTaskStatusCheckbox = async (
         return (
             <ProfileView
               user={user!}
-              tasks={tasks}
+              tasks={visibleTasks}
             />
           );
       case "settings":
@@ -556,7 +571,7 @@ const handleToggleTaskStatusCheckbox = async (
           <MobilePreview
             currentTab={currentTab}
             user={user!}
-            tasks={tasks}
+            tasks={visibleTasks}
             projects={projects}
             notifications={notifications}
             onToggleTaskStatus={handleToggleTaskStatusCheckbox}
@@ -565,7 +580,7 @@ const handleToggleTaskStatusCheckbox = async (
       default:
         return (
           <DashboardView
-            tasks={tasks}
+            tasks={visibleTasks}
             projects={projects}
             activityLogs={activityLogs}
             dashboardStats={dashboardStats}
@@ -611,6 +626,8 @@ const handleToggleTaskStatusCheckbox = async (
         currentTab={currentTab}
         setCurrentTab={setCurrentTab}
         projects={projects}
+        selectedProjectId={selectedProjectId}
+        onSelectProject={setSelectedProjectId}
         activeTasksCount={tasks.filter(t => t.status !== TaskStatus.DONE).length}
         onLogout={handleLogout}
       />
@@ -637,6 +654,7 @@ const handleToggleTaskStatusCheckbox = async (
         onClose={() => setIsTaskModalOpen(false)}
         onSave={handleSaveTask}
         editingTask={editingTask}
+        projects={projects}
       />
       {/* Toast Notifications */}
       <ToastContainer
