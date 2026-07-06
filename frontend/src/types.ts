@@ -39,21 +39,22 @@ export interface Task {
   projectId: string;
   dueDate: string;
   labels: string[];
+  project_id?: number | null;
+  due_date?: string | null;
   createdAt: string;
 }
 
 export interface Project {
-  id: string;
+  id: number;
   name: string;
   description: string;
   status: "active" | "planning" | "completed";
-  progress: number; // 0 to 100
-  dueDate: string;
-  teamIds: string[];
-  category: string;
-  color: string;
+  user_id: number;
+  created_at: string;
+  // Optional UI-only fields
+  color?: string;
+  progress?: number;
 }
-
 export interface ActivityLog {
   id: string;
   userId: string;

@@ -17,7 +17,12 @@ import { useAuth } from "../context/AuthContext";
 interface SidebarProps {
   currentTab: string;
   setCurrentTab: (tab: string) => void;
+
   projects: Project[];
+
+  selectedProjectId: number | null;
+  onSelectProject: (id: number | null) => void;
+
   activeTasksCount: number;
   onLogout: () => void;
 }
@@ -25,7 +30,12 @@ interface SidebarProps {
 export default function Sidebar({
   currentTab,
   setCurrentTab,
+
   projects,
+
+  selectedProjectId,
+  onSelectProject,
+
   activeTasksCount,
   onLogout,
 }: SidebarProps) {
@@ -190,13 +200,37 @@ export default function Sidebar({
           </div>
 
           <div className="space-y-1">
+            <button
+              onClick={() => {
+                onSelectProject(null);
+                setCurrentTab("board");
+              }}
+              className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs transition ${
+                selectedProjectId === null
+                  ? "bg-indigo-600/20 text-indigo-400"
+                  : "hover:bg-surface-2"
+              }`}
+            >
+              <span className="h-2 w-2 rounded-full bg-indigo-500" />
+
+              <span className="font-medium">
+                All Projects
+              </span>
+            </button>
 
             {projects.map((project) => (
 
               <button
                 key={project.id}
-                onClick={() => setCurrentTab("board")}
-                className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-xs transition hover:bg-surface-2"
+                onClick={() => {
+                  onSelectProject(Number(project.id));
+                  setCurrentTab("board");
+                }}
+                className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-xs transition ${
+                  selectedProjectId === Number(project.id)
+                    ? "bg-indigo-600/20"
+                    : "hover:bg-surface-2"
+                }`}
               >
 
                 <div className="flex items-center gap-2 overflow-hidden">
