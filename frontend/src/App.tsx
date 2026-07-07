@@ -3,6 +3,8 @@ import * as dashboardService from "./services/dashboardService";
 import * as projectService from "./services/projectService";
 import ProjectTimelinePage from "./pages/ProjectTimelinePage";
 import * as taskService from "./services/taskService";
+import ProjectModal from "./components/ProjectModal";
+import ProjectsView from "./components/ProjectsView";
 import { useTheme } from "./context/ThemeContext";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -89,7 +91,7 @@ export default function App() {
   // Task Creator Modal indicators
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
-
+  const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
   // Profile username edits in settings
   const [userName, setUserName] = useState(() => {
   const savedUser = localStorage.getItem("pulse_user");
@@ -189,7 +191,7 @@ useEffect(() => {
   useEffect(() => {
     localStorage.setItem("pulse_last_tab", currentTab);
   }, [currentTab]);
-useEffect(() => {
+  useEffect(() => {
   // Automatically re-calculate overall progress
   const projTasks = tasks.filter(
     t => t.projectId === "proj-1"
@@ -373,6 +375,42 @@ const handleSaveTask = async (
 
   }
 };
+const handleSaveProject = async (
+  projectData: {
+    name: string;
+    description: string;
+    status: string;
+  }
+) => {
+  try {
+
+    const response =
+      await projectService.createProject(
+        projectData
+      );
+
+    await loadProjects();
+
+    // Automatically select the new project
+    if (response.project) {
+      setSelectedProjectId(
+        Number(response.project.id)
+      );
+    }
+
+    // Open the board
+    setCurrentTab("board");
+
+    setIsProjectModalOpen(false);
+
+  } catch (error) {
+
+    console.error(error);
+
+    notifyError("Failed to create project");
+
+  }
+};
 const handleDeleteTask = async (
   id: number
 ) => {
@@ -523,6 +561,7 @@ const handleToggleTaskStatusCheckbox = async (
 // ======================
 // RENDER HELPERS
 // ======================
+  console.log("Current Tab:", currentTab);
   const renderTabContent = () => {
     const primaryRevampProject = projects.find(p => p.id === selectedProjectId) || projects[0];
 
@@ -549,6 +588,13 @@ const handleToggleTaskStatusCheckbox = async (
             onEditTask={handleOpenEditTaskModal}
             onDeleteTask={handleDeleteTask}
             onUpdateTaskStatus={handleUpdateTaskStatus}
+          />
+        );
+      case "projects":
+        return (
+          <ProjectsView
+            projects={projects}
+            tasks={tasks}
           />
         );
       case "timeline":
@@ -630,6 +676,7 @@ const handleToggleTaskStatusCheckbox = async (
         onSelectProject={setSelectedProjectId}
         activeTasksCount={tasks.filter(t => t.status !== TaskStatus.DONE).length}
         onLogout={handleLogout}
+        onOpenProjectModal={() => setIsProjectModalOpen(true)}
       />
 
       {/* 2. Content view layout including Header */}
@@ -655,6 +702,13 @@ const handleToggleTaskStatusCheckbox = async (
         onSave={handleSaveTask}
         editingTask={editingTask}
         projects={projects}
+      />
+      <ProjectModal
+        isOpen={isProjectModalOpen}
+        onClose={() =>
+          setIsProjectModalOpen(false)
+        }
+        onSave={handleSaveProject}
       />
       {/* Toast Notifications */}
       <ToastContainer
