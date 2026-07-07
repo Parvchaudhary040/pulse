@@ -25,6 +25,9 @@ interface SidebarProps {
 
   activeTasksCount: number;
   onLogout: () => void;
+
+  onLogout: () => void;
+  onOpenProjectModal: () => void;
 }
 
 export default function Sidebar({
@@ -38,6 +41,8 @@ export default function Sidebar({
 
   activeTasksCount,
   onLogout,
+
+  onOpenProjectModal,
 }: SidebarProps) {
   const { user } = useAuth();
 
@@ -132,7 +137,10 @@ export default function Sidebar({
 
               <button
                 key={item.id}
-                onClick={() => setCurrentTab(item.id)}
+                onClick={() => {
+                  console.log("Clicked menu:", item.id);
+                  setCurrentTab(item.id);
+                }}
                 className={`flex h-10 w-full items-center justify-between rounded-xl border px-3 text-xs font-semibold transition-all ${
                   active
                     ? "border-indigo-500 bg-indigo-600/15 text-primary"
@@ -187,15 +195,15 @@ export default function Sidebar({
           <div className="mb-3 flex items-center justify-between px-3">
 
             <span className="text-[10px] font-mono uppercase tracking-widest text-secondary">
-
               Projects
-
             </span>
 
-            <FolderOpen
-              size={14}
-              className="text-secondary"
-            />
+            <button
+              onClick={onOpenProjectModal}
+              className="flex h-6 w-6 items-center justify-center rounded-md bg-indigo-600 text-white transition hover:bg-indigo-700"
+            >
+              +
+            </button>
 
           </div>
 
@@ -252,7 +260,7 @@ export default function Sidebar({
 
                 <span className="rounded bg-surface-2 px-2 py-0.5 text-[10px] text-secondary">
 
-                  {project.progress}%
+                  {project.progress ?? 0}%
 
                 </span>
 
