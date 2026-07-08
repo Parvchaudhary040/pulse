@@ -8,6 +8,7 @@ import {
   Smartphone,
   LogOut,
   FolderOpen,
+  MoreVertical,
 } from "lucide-react";
 
 import { Project } from "../types";
@@ -28,6 +29,8 @@ interface SidebarProps {
 
   onLogout: () => void;
   onOpenProjectModal: () => void;
+  onEditProject: (project: Project) => void;
+  onDeleteProject: (project: Project) => void;
 }
 
 export default function Sidebar({
@@ -43,8 +46,14 @@ export default function Sidebar({
   onLogout,
 
   onOpenProjectModal,
+
+  onEditProject,
+
+  onDeleteProject,
 }: SidebarProps) {
   const { user } = useAuth();
+  const [openMenu, setOpenMenu] =
+  React.useState<number | null>(null);
 
   const menuItems = [
     {
@@ -258,11 +267,63 @@ export default function Sidebar({
 
                 </div>
 
-                <span className="rounded bg-surface-2 px-2 py-0.5 text-[10px] text-secondary">
+                <div className="relative">
 
-                  {project.progress ?? 0}%
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
 
-                </span>
+                      setOpenMenu(
+                        openMenu === Number(project.id)
+                          ? null
+                          : Number(project.id)
+                      );
+                    }}
+                    className="rounded p-1 hover:bg-surface-2"
+                  >
+                    <MoreVertical size={14} />
+                  </button>
+
+                  {openMenu === Number(project.id) && (
+
+                    <div className="absolute right-0 top-7 z-50 w-40 rounded-xl border border-default bg-surface shadow-xl">
+
+                      <button
+                        onClick={() => {
+                          onSelectProject(Number(project.id));
+                          setCurrentTab("board");
+                          setOpenMenu(null);
+                        }}
+                        className="w-full px-4 py-2 text-left text-sm hover:bg-surface-2"
+                      >
+                        Open Board
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          onEditProject(project);
+                          setOpenMenu(null);
+                        }}
+                        className="w-full px-4 py-2 text-left text-sm hover:bg-surface-2"
+                      >
+                        Edit Project
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          onDeleteProject(project);
+                          setOpenMenu(null);
+                        }}
+                        className="w-full px-4 py-2 text-left text-sm text-red-500 hover:bg-surface-2"
+                      >
+                        Delete Project
+                      </button>
+
+                    </div>
+
+                  )}
+
+                </div>
 
               </button>
 
