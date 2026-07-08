@@ -31,15 +31,50 @@ export const getProjects = async (
 ) => {
   const result = await pool.query(
     `
-    SELECT *
-    FROM projects
-    WHERE user_id=$1
-    ORDER BY created_at DESC
+    SELECT
+        p.*,
+
+        COUNT(t.id) AS total_tasks,
+
+        COUNT(
+            CASE
+                WHEN t.status='done'
+                THEN 1
+            END
+        ) AS completed_tasks
+
+    FROM projects p
+
+    LEFT JOIN tasks t
+    ON p.id=t.project_id
+
+    WHERE p.user_id=$1
+
+    GROUP BY p.id
+
+    ORDER BY p.created_at DESC;
     `,
     [userId]
   );
 
-  return result.rows;
+  return result.rows.map(project => ({
+
+    ...project,
+
+    total_tasks: Number(project.total_tasks),
+
+    completed_tasks: Number(project.completed_tasks),
+
+    progress:
+      project.total_tasks == 0
+        ? 0
+        : Math.round(
+            project.completed_tasks *
+            100 /
+            project.total_tasks
+          )
+
+  }));
 };
 
 export const updateProject = async (
