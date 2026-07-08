@@ -45,7 +45,7 @@ export interface Task {
 }
 
 export interface Project {
-  id: number;
+  id: string;
   name: string;
   description: string;
   status: "active" | "planning" | "completed";
@@ -54,6 +54,8 @@ export interface Project {
   // Optional UI-only fields
   color?: string;
   progress?: number;
+  total_tasks: number;
+  completed_tasks: number;
 }
 export interface ActivityLog {
   id: string;

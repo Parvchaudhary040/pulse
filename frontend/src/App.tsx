@@ -315,8 +315,8 @@ const handleSaveTask = async (
           status: taskData.status,
           priority: taskData.priority,
 
-          project_id: taskData.project_id,
-          due_date: taskData.due_date,
+          project_id: taskData.project_id || null,
+          due_date: taskData.due_date || null,
         }
       );
 
@@ -339,8 +339,8 @@ const handleSaveTask = async (
         description: taskData.description,
         status: taskData.status,
         priority: taskData.priority,
-        project_id: taskData.project_id,
-        due_date: taskData.due_date,
+        project_id: taskData.project_id || null,
+        due_date: taskData.due_date || null,
       });
 
       await activityService.createActivity({
