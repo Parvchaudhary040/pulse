@@ -92,6 +92,7 @@ export default function App() {
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
+  const [editingProject, setEditingProject] = useState<Project | null>(null);
   // Profile username edits in settings
   const [userName, setUserName] = useState(() => {
   const savedUser = localStorage.getItem("pulse_user");
@@ -375,8 +376,31 @@ const handleSaveTask = async (
 
   }
 };
+const handleDeleteTask = async (task: Task) => {
+  const confirmed = window.confirm(
+    `Delete "${task.title}"?`
+  );
+
+  if (!confirmed) return;
+
+  try {
+    await taskService.deleteTask(Number(task.id));
+
+    await loadTasks();
+    await loadActivities();
+    await loadDashboard();
+
+    notifySuccess("Task deleted");
+
+  } catch (error) {
+    console.error(error);
+
+    notifyError("Failed to delete task");
+  }
+};
 const handleSaveProject = async (
   projectData: {
+    id?: number;
     name: string;
     description: string;
     status: string;
@@ -384,22 +408,43 @@ const handleSaveProject = async (
 ) => {
   try {
 
-    const response =
-      await projectService.createProject(
-        projectData
+    if (projectData.id) {
+
+      // UPDATE
+
+      await projectService.updateProject(
+        projectData.id,
+        {
+          name: projectData.name,
+          description: projectData.description,
+          status: projectData.status,
+        }
       );
+
+    } else {
+
+      // CREATE
+
+      const response =
+        await projectService.createProject({
+          name: projectData.name,
+          description: projectData.description,
+          status: projectData.status,
+        });
+
+      if (response.project) {
+        setSelectedProjectId(
+          Number(response.project.id)
+        );
+      }
+
+    }
 
     await loadProjects();
 
-    // Automatically select the new project
-    if (response.project) {
-      setSelectedProjectId(
-        Number(response.project.id)
-      );
-    }
-
-    // Open the board
     setCurrentTab("board");
+
+    setEditingProject(null);
 
     setIsProjectModalOpen(false);
 
@@ -407,53 +452,52 @@ const handleSaveProject = async (
 
     console.error(error);
 
-    notifyError("Failed to create project");
+    notifyError("Failed to save project");
 
   }
 };
-const handleDeleteTask = async (
-  id: number
+const handleEditProject = (
+  project: Project
 ) => {
-  const targetTask = tasks.find(
-    t => Number(t.id) === id
-  );
 
-  if (!targetTask) return;
+  setEditingProject(project);
+
+  setIsProjectModalOpen(true);
+
+};
+const handleDeleteProject = async (
+  project: Project
+) => {
 
   const confirmed = window.confirm(
-    `Delete "${targetTask.title}"?`
+    `Delete "${project.name}"?`
   );
 
   if (!confirmed) return;
 
   try {
 
-    await taskService.deleteTask(id);
+    await projectService.deleteProject(
+      Number(project.id)
+    );
 
-    await activityService.createActivity({
-      user_name: userName,
-      action: "deleted task",
-      target_type: "task",
-      target_name: targetTask.title,
-      details: `Deleted "${targetTask.title}"`,
-    });
+    if (
+      selectedProjectId === Number(project.id)
+    ) {
+      setSelectedProjectId(null);
+    }
 
-    await loadTasks();
-
-    await loadDashboard();
-
-    await loadActivities();
-    notifyInfo("Task status updated.");
+    await loadProjects();
 
   } catch (error) {
 
     console.error(error);
 
-    notifyError("Failed to delete task");
+    notifyError("Failed to delete project");
 
   }
-};
 
+};
 const handleUpdateTaskStatus = async (
   id: number,
   nextStatus: TaskStatus
@@ -671,14 +715,29 @@ const handleToggleTaskStatusCheckbox = async (
       <Sidebar
         currentTab={currentTab}
         setCurrentTab={setCurrentTab}
+
         projects={projects}
+
         selectedProjectId={selectedProjectId}
         onSelectProject={setSelectedProjectId}
-        activeTasksCount={tasks.filter(t => t.status !== TaskStatus.DONE).length}
-        onLogout={handleLogout}
-        onOpenProjectModal={() => setIsProjectModalOpen(true)}
-      />
 
+        onOpenProjectModal={() => {
+          setEditingProject(null);
+          setIsProjectModalOpen(true);
+        }}
+
+        onEditProject={handleEditProject}
+
+        onDeleteProject={handleDeleteProject}
+
+        activeTasksCount={
+          tasks.filter(
+            t => t.status !== TaskStatus.DONE
+          ).length
+        }
+
+        onLogout={handleLogout}
+      />
       {/* 2. Content view layout including Header */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
         <Header
@@ -705,9 +764,11 @@ const handleToggleTaskStatusCheckbox = async (
       />
       <ProjectModal
         isOpen={isProjectModalOpen}
-        onClose={() =>
-          setIsProjectModalOpen(false)
-        }
+        onClose={() => {
+          setEditingProject(null);
+          setIsProjectModalOpen(false);
+        }}
+        editingProject={editingProject}
         onSave={handleSaveProject}
       />
       {/* Toast Notifications */}

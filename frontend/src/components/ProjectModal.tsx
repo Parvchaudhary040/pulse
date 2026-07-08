@@ -1,11 +1,15 @@
 import React, { useEffect, useState } from "react";
+import { Project } from "../types";
 import { X } from "lucide-react";
 
 interface ProjectModalProps {
   isOpen: boolean;
   onClose: () => void;
 
+  editingProject?: Project | null;
+
   onSave: (project: {
+    id?: number;
     name: string;
     description: string;
     status: string;
@@ -16,20 +20,32 @@ export default function ProjectModal({
   isOpen,
   onClose,
   onSave,
+  editingProject,
 }: ProjectModalProps) {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [status, setStatus] = useState("active");
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    if (isOpen) {
-      setName("");
-      setDescription("");
-      setStatus("active");
-      setError("");
-    }
-  }, [isOpen]);
+useEffect(() => {
+
+  if (editingProject) {
+
+    setName(editingProject.name);
+    setDescription(editingProject.description);
+    setStatus(editingProject.status);
+
+  } else {
+
+    setName("");
+    setDescription("");
+    setStatus("active");
+
+  }
+
+  setError("");
+
+}, [editingProject, isOpen]);
 
   if (!isOpen) return null;
 
@@ -43,11 +59,14 @@ export default function ProjectModal({
       return;
     }
 
-    onSave({
-      name,
-      description,
-      status,
-    });
+  onSave({
+    id: editingProject?.id
+      ? Number(editingProject.id)
+      : undefined,
+    name,
+    description,
+    status,
+  });
 
     onClose();
   };
@@ -60,7 +79,9 @@ export default function ProjectModal({
         <div className="flex items-center justify-between border-b border-default px-6 py-5">
 
           <h2 className="text-lg font-bold">
-            Create Project
+            {editingProject
+              ? "Edit Project"
+              : "Create Project"}
           </h2>
 
           <button
@@ -160,7 +181,9 @@ export default function ProjectModal({
               type="submit"
               className="rounded-xl bg-indigo-600 px-6 py-3 font-semibold text-white hover:bg-indigo-700"
             >
-              Create Project
+              {editingProject
+                ? "Save Changes"
+                : "Create Project"}
             </button>
 
           </div>
