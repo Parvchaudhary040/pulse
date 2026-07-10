@@ -3,6 +3,7 @@ import {
   Search,
   Bell,
   Plus,
+  Sparkles,
 } from "lucide-react";
 
 import { useAuth } from "../context/AuthContext";
@@ -14,6 +15,8 @@ interface HeaderProps {
   onMarkNotificationRead: (id: string) => void;
   onMarkAllNotificationsRead: () => void;
   onOpenTaskModal: () => void;
+
+  onToggleAI: () => void;
 }
 
 export default function Header({
@@ -22,6 +25,7 @@ export default function Header({
   onMarkNotificationRead,
   onMarkAllNotificationsRead,
   onOpenTaskModal,
+  onToggleAI,
 }: HeaderProps) {
 
   const { user } = useAuth();
@@ -306,6 +310,16 @@ className="text-secondary"
 )}
 
 </div>
+        <button
+          onClick={onToggleAI}
+          className="flex h-10 items-center gap-2 rounded-lg border border-indigo-500 px-4 text-sm font-semibold text-indigo-500 transition hover:bg-indigo-500 hover:text-white"
+        >
+          <Sparkles size={16} />
+
+          <span className="hidden sm:block">
+            Pulse AI
+          </span>
+        </button>
         {/* New Task Button */}
         <button
           onClick={onOpenTaskModal}

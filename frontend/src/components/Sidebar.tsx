@@ -259,12 +259,31 @@ export default function Sidebar({
                     }}
                   />
 
-                  <span className="truncate text-primary">
+                  <div className="flex-1 overflow-hidden">
 
-                    {project.name}
+                    <p className="truncate text-sm font-medium text-primary">
+                      {project.name}
+                    </p>
 
-                  </span>
+                    <div className="mt-2 h-1.5 w-full rounded-full bg-surface-2">
 
+                      <div
+                        className="h-1.5 rounded-full bg-indigo-500 transition-all"
+                        style={{
+                          width: `${project.progress}%`,
+                        }}
+                      />
+
+                    </div>
+
+                  </div>
+
+                  <div className="ml-3 text-xs font-bold text-secondary">
+
+                    {project.progress}%
+
+                  </div>
+                  
                 </div>
 
                 <div className="relative">
