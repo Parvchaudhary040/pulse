@@ -1,3 +1,6 @@
+import AIChatPanel from "./components/AI/AIChatPanel";
+import { useAI } from "./hooks/useAI";
+import { useWorkspaceContext } from "./hooks/useWorkspaceContext";
 import * as activityService from "./services/activityService";
 import * as dashboardService from "./services/dashboardService";
 import * as projectService from "./services/projectService";
@@ -36,6 +39,11 @@ export default function App() {
 // ======================
 // APPLICATION STATE
 // ======================
+  const {
+  isOpen: isAIOpen,
+  toggleAI,
+  closeAI,
+} = useAI();
   const { user } = useAuth();
   const { theme } = useTheme();
   const [dashboardStats, setDashboardStats] =
@@ -107,6 +115,20 @@ export default function App() {
 
   return "User";
 });
+  const workspaceContext =
+    useWorkspaceContext({
+
+      userName,
+
+      tasks,
+
+      projects,
+
+      activities: activityLogs,
+
+      dashboard: dashboardStats,
+
+  });
 
 // ======================
 // DATA LOADER FUNCTIONS
@@ -514,10 +536,13 @@ const handleUpdateTaskStatus = async (
       description: targetTask.description,
       status: nextStatus,
       priority: targetTask.priority,
+      project_id: targetTask.project_id,
+      due_date: targetTask.due_date,
     });
 
     // Reload everything from PostgreSQL
     await loadTasks();
+    await loadProjects();
     await loadDashboard();
     await loadActivities();
     notifyInfo("Task status updated.");
@@ -746,6 +771,7 @@ const handleToggleTaskStatusCheckbox = async (
           onMarkNotificationRead={handleMarkNotificationRead}
           onMarkAllNotificationsRead={handleMarkAllNotificationsRead}
           onOpenTaskModal={handleOpenNewTaskModal}
+          onToggleAI={toggleAI}
         />
 
         {/* Real Content Scrolling Panel */}
@@ -770,6 +796,10 @@ const handleToggleTaskStatusCheckbox = async (
         }}
         editingProject={editingProject}
         onSave={handleSaveProject}
+      />
+      <AIChatPanel
+        isOpen={isAIOpen}
+        onClose={closeAI}
       />
       {/* Toast Notifications */}
       <ToastContainer
