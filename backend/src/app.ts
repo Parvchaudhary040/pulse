@@ -5,8 +5,10 @@ import projectRoutes from "./routes/projectRoutes";
 import taskRoutes from "./routes/taskRoutes";
 import authRoutes from "./routes/authRoutes";
 import express from "express";
+import aiRoutes from "./routes/aiRoutes";
 import cors from "cors";
 import dotenv from "dotenv";
+
 
 dotenv.config();
 
@@ -32,6 +34,7 @@ app.use("/api/tasks", taskRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/activities", activityRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/ai", aiRoutes);
 
 // Health Check Route
 app.get("/", (req, res) => {
