@@ -1,21 +1,19 @@
+import api from "./api";
+
 export const askAI = async (
   prompt: string,
   workspace: any
 ) => {
 
-  console.log("Prompt");
+  const response =
+    await api.post("/ai/chat", {
 
-  console.log(prompt);
+      prompt,
 
-  console.log("Workspace");
+      workspace,
 
-  console.log(workspace);
+    });
 
-  return {
-
-    reply:
-      "OpenAI integration coming next."
-
-  };
+  return response.data;
 
 };

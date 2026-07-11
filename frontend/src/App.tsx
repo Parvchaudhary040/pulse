@@ -800,6 +800,7 @@ const handleToggleTaskStatusCheckbox = async (
       <AIChatPanel
         isOpen={isAIOpen}
         onClose={closeAI}
+        workspaceContext={workspaceContext}
       />
       {/* Toast Notifications */}
       <ToastContainer
