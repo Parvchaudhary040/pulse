@@ -28,10 +28,14 @@ import {
   Priority,
 } from "../types";
 
+import AIInsightsCard from "./AIInsightsCard";
+
 interface DashboardViewProps {
   tasks: Task[];
   projects: Project[];
   activityLogs: ActivityLog[];
+  aiInsight: string;
+  aiLoading: boolean;
 
   dashboardStats: {
     totalTasks: number;
@@ -49,6 +53,8 @@ export default function DashboardView({
   projects,
   activityLogs,
   dashboardStats,
+  aiInsight,
+  aiLoading,
   onToggleTaskStatus,
   onOpenTaskModal,
 }: DashboardViewProps) {
@@ -343,6 +349,13 @@ export default function DashboardView({
 
     </div>
 
+    {/* AI Insights */}
+
+    <AIInsightsCard
+      insight={aiInsight}
+      loading={aiLoading}
+    />
+
     {/* ==========================================
         CHARTS
     =========================================== */}
@@ -545,68 +558,6 @@ export default function DashboardView({
               </div>
 
             ))}
-
-        </div>
-
-      </div>
-
-      {/* AI Insights */}
-
-      <div className="rounded-2xl border border-default bg-surface p-6">
-
-        <h2 className="mb-6 text-2xl font-bold">
-          AI Insights
-        </h2>
-
-        <div className="space-y-4">
-
-          <div className="rounded-xl bg-indigo-500/10 p-4">
-
-            <p className="font-semibold">
-              Completion Rate
-            </p>
-
-            <p className="mt-2 text-secondary">
-              {analytics.completionRate}% of your tasks have been completed.
-            </p>
-
-          </div>
-
-          <div className="rounded-xl bg-orange-500/10 p-4">
-
-            <p className="font-semibold">
-              High Priority
-            </p>
-
-            <p className="mt-2 text-secondary">
-              {highTasks + urgentTasks} high-priority tasks still need attention.
-            </p>
-
-          </div>
-
-          <div className="rounded-xl bg-red-500/10 p-4">
-
-            <p className="font-semibold">
-              Overdue
-            </p>
-
-            <p className="mt-2 text-secondary">
-              {analytics.overdueTasks} overdue task(s) detected.
-            </p>
-
-          </div>
-
-          <div className="rounded-xl bg-green-500/10 p-4">
-
-            <p className="font-semibold">
-              Productivity Score
-            </p>
-
-            <p className="mt-2 text-secondary">
-              Your current productivity score is {analytics.productivityScore}%.
-            </p>
-
-          </div>
 
         </div>
 

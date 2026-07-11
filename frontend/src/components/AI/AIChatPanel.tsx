@@ -25,9 +25,12 @@ export default function AIChatPanel({
     setLoading(true);
 
     try {
+      console.log("Workspace Context:", workspaceContext);
       const result = await askAI(prompt, workspaceContext);
 
-      setReply(result.reply);
+      setReply(
+        result.reply || "No response."
+      );
     } catch (error) {
       console.error(error);
       setReply("Something went wrong.");
