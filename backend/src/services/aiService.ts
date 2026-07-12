@@ -1,40 +1,28 @@
 import Groq from "groq-sdk";
 
+function getGroqClient() {
+  const apiKey = process.env.GROQ_API_KEY;
+
+  if (!apiKey) {
+    throw new Error(
+      "GROQ_API_KEY is missing. Check your backend/.env file."
+    );
+  }
+
+  return new Groq({
+    apiKey,
+  });
+}
+
+// =============================
+// CHAT
+// =============================
 export const askAI = async (
   prompt: string,
   workspace: any
 ) => {
 
-  const groq = new Groq({
-    apiKey: process.env.GROQ_API_KEY,
-  });
-
-
-  const systemPrompt = `
-You are Pulse AI.
-
-You are an expert AI Project Manager.
-
-The user will provide:
-
-- Dashboard
-- Projects
-- Tasks
-- Activity
-
-Analyze everything before answering.
-
-Always give practical advice.
-
-If there are overdue tasks,
-mention them.
-
-If there are high priority tasks,
-recommend them first.
-
-Keep responses concise.
-
-`;
+  const groq = getGroqClient();
 
   const completion =
     await groq.chat.completions.create({
@@ -45,7 +33,17 @@ Keep responses concise.
 
         {
           role: "system",
-          content: systemPrompt,
+          content: `
+You are Pulse AI.
+
+You are an expert AI Project Manager.
+
+Answer naturally.
+
+Be concise.
+
+Give practical advice.
+`,
         },
 
         {
@@ -65,9 +63,87 @@ ${prompt}
 
       temperature: 0.5,
 
-      max_completion_tokens: 700,
+    });
+
+  return completion.choices[0].message.content ?? "";
+
+};
+
+// =============================
+// WORKSPACE ANALYSIS
+// =============================
+export const analyzeWorkspace = async (
+  workspace: any
+) => {
+
+  const groq = getGroqClient();
+
+  const completion =
+    await groq.chat.completions.create({
+
+      model: "llama-3.3-70b-versatile",
+
+      messages: [
+
+        {
+          role: "system",
+          content: `
+You are Pulse AI.
+
+Analyze this workspace.
+
+Return ONLY valid JSON.
+
+{
+  "health": 0,
+  "productivity": "",
+  "summary": "",
+  "recommendation": "",
+  "risks": []
+}
+
+Rules:
+- health must be between 0 and 100
+- productivity must be one of:
+  "Excellent"
+  "Good"
+  "Average"
+  "Poor"
+- risks must always be an array
+- Do not use markdown
+- Do not explain anything
+- Return JSON only
+`,
+        },
+
+        {
+          role: "user",
+          content: JSON.stringify(workspace),
+        },
+
+      ],
+
+      temperature: 0.3,
 
     });
 
-  return completion.choices[0].message.content;
+  const content =
+    completion.choices[0].message.content ?? "{}";
+
+  try {
+    return JSON.parse(content);
+  } catch {
+
+    console.error("Invalid JSON from Groq:");
+    console.error(content);
+
+    return {
+      health: 0,
+      productivity: "Average",
+      summary: "Unable to analyze workspace.",
+      recommendation: "Try again later.",
+      risks: [],
+    };
+  }
+
 };
