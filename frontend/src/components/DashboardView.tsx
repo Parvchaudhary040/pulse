@@ -26,6 +26,7 @@ import {
   ActivityLog,
   TaskStatus,
   Priority,
+  AIWorkspaceInsight,
 } from "../types";
 
 import AIInsightsCard from "./AIInsightsCard";
@@ -34,7 +35,7 @@ interface DashboardViewProps {
   tasks: Task[];
   projects: Project[];
   activityLogs: ActivityLog[];
-  aiInsight: string;
+  aiInsight: AIWorkspaceInsight | null;
   aiLoading: boolean;
 
   dashboardStats: {

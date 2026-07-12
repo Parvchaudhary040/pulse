@@ -86,3 +86,11 @@ export interface Notification {
   read: boolean;
   createdAt: string;
 }
+
+export interface AIWorkspaceInsight {
+  health: number;
+  productivity: string;
+  summary: string;
+  recommendation: string;
+  risks: string[];
+}

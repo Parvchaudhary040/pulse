@@ -39,3 +39,33 @@ export const chat = async (
   }
 
 };
+
+export const analyzeWorkspace = async (
+  req: Request,
+  res: Response
+) => {
+
+  try {
+
+    const { workspace } = req.body;
+
+    const insight =
+      await aiService.analyzeWorkspace(workspace);
+
+    res.json({
+      success: true,
+      insight,
+    });
+
+  } catch (error) {
+
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message: "AI analysis failed",
+    });
+
+  }
+
+};
