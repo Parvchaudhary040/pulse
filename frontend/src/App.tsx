@@ -8,6 +8,7 @@ import ProjectTimelinePage from "./pages/ProjectTimelinePage";
 import * as taskService from "./services/taskService";
 import ProjectModal from "./components/ProjectModal";
 import ProjectsView from "./components/ProjectsView";
+import { getWorkspaceInsight } from "./services/aiService";
 import { useTheme } from "./context/ThemeContext";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -19,7 +20,7 @@ import React, { useState, useEffect } from "react";
 import {
   projects as seedProjects,
 } from "./data";
-import { Task, TaskStatus, Project, ActivityLog, Notification, Priority } from "./types";
+import { Task, TaskStatus, Project, ActivityLog, Notification, Priority, AIWorkspaceInsight } from "./types";
 // Inner-components imports
 import LandingPage from "./components/LandingPage";
 import SimpleLoginSignup from "./components/SimpleLoginSignup";
@@ -101,6 +102,7 @@ export default function App() {
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [aiInsight, setAIInsight] = useState<AIWorkspaceInsight | null>(null);
   // Profile username edits in settings
   const [userName, setUserName] = useState(() => {
   const savedUser = localStorage.getItem("pulse_user");
@@ -183,9 +185,57 @@ const loadAllData = async () => {
     loadDashboard(),
   ]);
 };
+const [aiLoading, setAILoading] = useState(false);
+
+const generateAIInsight = async () => {
+
+  if (
+    tasks.length === 0 &&
+    projects.length === 0
+  ) {
+    return;
+  }
+
+  setAILoading(true);
+
+  try {
+
+    const response =
+      await getWorkspaceInsight(
+        workspaceContext
+      );
+
+    setAIInsight(response.insight);
+
+  } catch (error) {
+
+    console.error(
+      "AI Insight Error:",
+      error
+    );
+
+  } finally {
+
+    setAILoading(false);
+
+  }
+
+};
 // ======================
 // EFFECTS
 // ======================
+useEffect(() => {
+
+  if (!authState.isAuthenticated) return;
+
+  generateAIInsight();
+
+}, [
+  tasks,
+  projects,
+  activityLogs,
+  dashboardStats,
+]);
 useEffect(() => {
   loadProjects();
 }, []);
@@ -642,6 +692,8 @@ const handleToggleTaskStatusCheckbox = async (
             projects={projects}
             activityLogs={activityLogs}
             dashboardStats={dashboardStats}
+            aiInsight={aiInsight}
+            aiLoading={aiLoading}
             onToggleTaskStatus={handleToggleTaskStatusCheckbox}
             onOpenTaskModal={handleOpenNewTaskModal}
           />
@@ -699,6 +751,8 @@ const handleToggleTaskStatusCheckbox = async (
             projects={projects}
             activityLogs={activityLogs}
             dashboardStats={dashboardStats}
+            aiInsight={aiInsight}
+            aiLoading={aiLoading}
             onToggleTaskStatus={handleToggleTaskStatusCheckbox}
             onOpenTaskModal={handleOpenNewTaskModal}
           />

@@ -7,11 +7,12 @@ import {
   RefreshCcw,
 } from "lucide-react";
 
+import { AIWorkspaceInsight } from "../types";
+
 interface Props {
-  insight: string;
+  insight: AIWorkspaceInsight | null;
   loading: boolean;
 }
-
 export default function AIInsightsCard({
   insight,
   loading,
@@ -78,9 +79,99 @@ export default function AIInsightsCard({
 
             </div>
 
-            <p className="whitespace-pre-wrap text-sm leading-7 text-secondary">
-              {insight}
+            {insight && (
+
+            <>
+
+            <div className="text-4xl font-black text-indigo-500">
+
+            {insight.health}%
+
+            </div>
+
+            <p className="text-secondary">
+
+            Workspace Health
+
             </p>
+
+            <hr className="my-5 border-default"/>
+
+            <div>
+
+            <h4 className="font-semibold">
+
+            Summary
+
+            </h4>
+
+            <p className="text-secondary">
+
+            {insight.summary}
+
+            </p>
+
+            </div>
+
+            <div className="mt-5">
+
+            <h4 className="font-semibold">
+
+            Recommendation
+
+            </h4>
+
+            <p>
+
+            {insight.recommendation}
+
+            </p>
+
+            </div>
+
+            <div className="mt-5">
+
+            <h4 className="font-semibold">
+
+            Risks
+
+            </h4>
+
+            <ul className="list-disc pl-5">
+
+            {insight.risks.map((risk,index)=>(
+
+            <li key={index}>
+
+            {risk}
+
+            </li>
+
+            ))}
+
+            </ul>
+
+            </div>
+
+            <div className="mt-5 rounded-xl bg-surface-2 p-4">
+
+            <strong>
+
+            Productivity
+
+            </strong>
+
+            <p>
+
+            {insight.productivity}
+
+            </p>
+
+            </div>
+
+            </>
+
+            )}
 
           </div>
 
