@@ -1,0 +1,66 @@
+
+services:
+
+  postgres:
+    image: postgres:17-alpine
+    container_name: pulse-postgres
+
+    restart: always
+
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+      POSTGRES_DB: pulse_db
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+
+  backend:
+    build: ./backend
+
+    container_name: pulse-backend
+
+    restart: always
+
+    ports:
+      - "5000:5000"
+
+    depends_on:
+      - postgres
+
+    environment:
+      PORT: 5000
+
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: pulse_db
+      DB_USER: postgres
+      DB_PASSWORD: postgres123
+
+      JWT_SECRET: Pulse@12345SecretKey
+
+      GROQ_API_KEY: ${GROQ_API_KEY}
+
+  frontend:
+    build: ./frontend
+
+    container_name: pulse-frontend
+
+    restart: always
+
+    ports:
+      - "3000:3000"
+
+    depends_on:
+      - backend
+
+    environment:
+      VITE_API_URL: http://localhost:5000/api
+
+volumes:
+
+  postgres_data:
