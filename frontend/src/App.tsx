@@ -22,7 +22,6 @@ import {
 } from "./data";
 import { Task, TaskStatus, Project, ActivityLog, Notification, Priority, AIWorkspaceInsight } from "./types";
 // Inner-components imports
-import LandingPage from "./components/LandingPage";
 import SimpleLoginSignup from "./components/SimpleLoginSignup";
 import Sidebar from "./components/Sidebar";
 import Header from "./components/Header";
@@ -33,6 +32,8 @@ import SettingsView from "./components/SettingsView";
 import MobilePreview from "./components/MobilePreview";
 import TaskModal from "./components/TaskModal";
 import { useAuth } from "./context/AuthContext";
+import OAuthSuccess from "./pages/OAuthSuccess";
+import { useLocation } from "react-router-dom";
 // ======================
 // APP COMPONENT
 // ======================
@@ -45,7 +46,13 @@ export default function App() {
   toggleAI,
   closeAI,
 } = useAI();
-  const { user } = useAuth();
+  const location = useLocation();
+  const {
+  user,
+  isAuthenticated,
+  loading,
+  logout,
+} = useAuth();
   const { theme } = useTheme();
   const [dashboardStats, setDashboardStats] =
   useState({
@@ -55,27 +62,8 @@ export default function App() {
     completionRate: 0,
   });
   // Session Authentication state
-  const [authState, setAuthState] = useState<{
-    isAuthenticated: boolean;
-    isSignUpMode: boolean;
-    isLandingMode: boolean;
-    email: string;
-  }>(() => {
-    const savedAuth = localStorage.getItem("pulse_auth");
-    if (savedAuth) {
-      try {
-        return JSON.parse(savedAuth);
-      } catch (e) {
-        // Fallback
-      }
-    }
-    return {
-      isAuthenticated: false,
-      isSignUpMode: false,
-      isLandingMode: true,
-      email: ""
-    };
-  });
+// Authentication is now handled entirely by AuthContext.
+// No local authState is maintained here.
 
   // Active workspace navbar tab
   const [currentTab, setCurrentTab] = useState<string>(() => {
@@ -104,19 +92,11 @@ export default function App() {
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [aiInsight, setAIInsight] = useState<AIWorkspaceInsight | null>(null);
   // Profile username edits in settings
-  const [userName, setUserName] = useState(() => {
-  const savedUser = localStorage.getItem("pulse_user");
+  const [userName, setUserName] = useState("User");
 
-  if (savedUser) {
-    try {
-      return JSON.parse(savedUser).name;
-    } catch {
-      return "User";
-    }
-  }
-
-  return "User";
-});
+  useEffect(() => {
+    setUserName(user?.name || "User");
+  }, [user]);
   const workspaceContext =
     useWorkspaceContext({
 
@@ -149,14 +129,12 @@ const loadTasks = async () => {
 const loadProjects = async () => {
   try {
     const response = await projectService.getProjects();
-    console.log("Projects API Response:", response);
     setProjects(response.projects || []);
   } catch (error) {
     console.error("Failed to load projects", error);
     setProjects([]);
   }
 };
-console.log("Projects:", projects);
 
 const loadActivities = async () => {
   try {
@@ -178,12 +156,14 @@ const loadDashboard = async () => {
 };
 
 const loadAllData = async () => {
-  await Promise.all([
-    loadTasks(),
-    loadProjects(),
-    loadActivities(),
-    loadDashboard(),
-  ]);
+  try {
+    await loadProjects();
+    await loadTasks();
+    await loadDashboard();
+    await loadActivities();
+  } catch (error) {
+    console.error("Failed to load workspace:", error);
+  }
 };
 const [aiLoading, setAILoading] = useState(false);
 
@@ -225,41 +205,38 @@ const generateAIInsight = async () => {
 // EFFECTS
 // ======================
 useEffect(() => {
+  if (!isAuthenticated) return;
 
-  if (!authState.isAuthenticated) return;
+  if (tasks.length === 0 && projects.length === 0) {
+    return;
+  }
 
   generateAIInsight();
-
 }, [
+  isAuthenticated,
   tasks,
   projects,
   activityLogs,
   dashboardStats,
 ]);
-useEffect(() => {
-  loadProjects();
-}, []);
 
 useEffect(() => {
-  loadActivities();
-}, []);
-
-useEffect(() => {
-  loadDashboard();
-}, []);
-
-useEffect(() => {
-  if (!authState.isAuthenticated) {
+  if (!isAuthenticated) {
     setTasks([]);
+    setProjects([]);
+    setActivityLogs([]);
+    setNotifications([]);
+    setDashboardStats({
+      totalTasks: 0,
+      completedTasks: 0,
+      activeProjects: 0,
+      completionRate: 0,
+    });
     return;
   }
 
-  loadTasks();
-}, [authState.isAuthenticated]);
-
-  useEffect(() => {
-    localStorage.setItem("pulse_auth", JSON.stringify(authState));
-  }, [authState]);
+  loadAllData();
+}, [isAuthenticated]);
 
   useEffect(() => {
     localStorage.setItem("pulse_last_tab", currentTab);
@@ -297,52 +274,31 @@ useEffect(() => {
 // ======================
 // AUTHENTICATION
 // ======================
-const handleLoginSuccess = async (email: string) => {
-  setAuthState({
-    isAuthenticated: true,
-    isSignUpMode: false,
-    isLandingMode: false,
-    email,
-  });
-
+const handleLoginSuccess = async () => {
   setCurrentTab("dashboard");
-
-  // Load all user data immediately
-  await loadAllData();
 };
 
 const handleLogout = () => {
-  setAuthState({
-    isAuthenticated: false,
-    isSignUpMode: false,
-    isLandingMode: true,
-    email: "",
-  });
+    logout();
 
-  // Clear React state
-  setTasks([]);
-  setProjects([]);
-  setActivityLogs([]);
-  setNotifications([]);
+    setTasks([]);
+    setProjects([]);
+    setActivityLogs([]);
+    setNotifications([]);
+    setSelectedProjectId(null);
+    setEditingTask(null);
+    setEditingProject(null);
 
-  setDashboardStats({
-    totalTasks: 0,
-    completedTasks: 0,
-    activeProjects: 0,
-    completionRate: 0,
-  });
+    setDashboardStats({
+        totalTasks: 0,
+        completedTasks: 0,
+        activeProjects: 0,
+        completionRate: 0,
+    });
 
-  localStorage.removeItem("pulse_auth");
-  localStorage.removeItem("pulse_last_tab");
-  localStorage.removeItem("pulse_token");
-  localStorage.removeItem("pulse_user");
+    setAIInsight(null);
+    setCurrentTab("dashboard");
 };
-  const handleToggleAuthMode = () => {
-    setAuthState(prev => ({
-      ...prev,
-      isSignUpMode: !prev.isSignUpMode
-    }));
-  };
 
   // Notification Operations
   const handleMarkNotificationRead = (id: string) => {
@@ -680,7 +636,6 @@ const handleToggleTaskStatusCheckbox = async (
 // ======================
 // RENDER HELPERS
 // ======================
-  console.log("Current Tab:", currentTab);
   const renderTabContent = () => {
     const primaryRevampProject = projects.find(p => p.id === selectedProjectId) || projects[0];
 
@@ -761,22 +716,32 @@ const handleToggleTaskStatusCheckbox = async (
   };
 
   // OUTER ROUTER SCREEN DECISION
-  if (authState.isLandingMode) {
-    return (
-      <LandingPage
-        onEnterApp={() => handleLoginSuccess("alex.rivera@pulse.io")}
-        onGoToLogin={() => setAuthState(p => ({ ...p, isLandingMode: false, isSignUpMode: false }))}
-        onGoToSignup={() => setAuthState(p => ({ ...p, isLandingMode: false, isSignUpMode: true }))}
-      />
-    );
+  // Google redirects here after its OAuth callback. This route needs to be
+  // handled by the live application router, rather than the unused AppRoutes
+  // component, so the returned token can be persisted.
+  if (location.pathname === "/oauth-success") {
+    return <OAuthSuccess />;
   }
 
-  if (!authState.isAuthenticated) {
+if (loading) {
+    return (
+        <div className="min-h-screen flex items-center justify-center bg-app">
+            <div className="flex flex-col items-center gap-4">
+                <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+
+                <p className="text-gray-400">
+                    Loading your workspace...
+                </p>
+            </div>
+        </div>
+    );
+}
+
+  if (!isAuthenticated) {
     return (
       <SimpleLoginSignup
-        initialIsSignUp={authState.isSignUpMode}
+        initialIsSignUp={false}
         onLoginSuccess={handleLoginSuccess}
-        onToggleMode={handleToggleAuthMode}
       />
     );
   }

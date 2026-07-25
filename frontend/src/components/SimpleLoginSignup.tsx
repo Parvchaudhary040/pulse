@@ -2,18 +2,20 @@ import React, { useState } from "react";
 import { Eye, EyeOff, Lock, Mail, ArrowRight, Github, Chrome } from "lucide-react";
 import PulseLogo from "./PulseLogo";
 import * as authService from "../services/authService";
-import { notifyInfo } from "../services/notificationService";
+import {
+  notifyInfo,
+  notifySuccess,
+} from "../services/notificationService";
+import { useAuth } from "../context/AuthContext";
 
 interface SimpleLoginSignupProps {
   initialIsSignUp?: boolean;
-  onLoginSuccess: (email: string) => Promise<void>;
-  onToggleMode: () => void;
+  onLoginSuccess: () => Promise<void>;
 }
 
 export default function SimpleLoginSignup({
   initialIsSignUp = false,
   onLoginSuccess,
-  onToggleMode
 }: SimpleLoginSignupProps) {
   const [isSignUp, setIsSignUp] = useState(initialIsSignUp);
   const [email, setEmail] = useState("alex.rivera@pulse.io");
@@ -23,6 +25,7 @@ export default function SimpleLoginSignup({
   const [agreeTerms, setAgreeTerms] = useState(true);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,14 +69,14 @@ try {
     });
 
   if (response.success) {
-  localStorage.setItem("pulse_token", response.token);
-  localStorage.setItem("pulse_user", JSON.stringify(response.user));
+    await login(response.token);
 
-  await onLoginSuccess(email);
-}
-else {
-  setError(response.message);
-}
+    await onLoginSuccess();
+
+    notifySuccess("Welcome back!");
+  } else {
+    setError(response.message);
+  }
   }
 } catch (error) {
   setError("Unable to connect to the server.");
@@ -89,8 +92,11 @@ else {
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
-      onLoginSuccess("alex.rivera@pulse.io");
+      onLoginSuccess();
     }, 600);
+  };
+  const handleGoogleLogin = () => {
+    window.location.assign(authService.getGoogleOAuthUrl());
   };
 
   return (
@@ -229,6 +235,39 @@ else {
         </form>
 
         {/* Dynamic switcher footer */}
+        <div className="my-6">
+          <div className="relative flex items-center">
+            <div className="flex-grow border-t border-default"></div>
+
+            <span className="mx-4 text-xs text-secondary uppercase">
+              Or continue with
+            </span>
+
+            <div className="flex-grow border-t border-default"></div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 mt-5">
+
+            <button
+              type="button"
+              onClick={handleGoogleLogin}
+              className="h-11 rounded-xl border border-default bg-app hover:bg-surface transition-all flex items-center justify-center gap-2"
+            >
+              <Chrome className="w-4 h-4" />
+              Google
+            </button>
+
+            <button
+              type="button"
+              disabled
+              className="h-11 rounded-xl border border-default bg-app opacity-50 cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              <Github className="w-4 h-4" />
+              GitHub
+            </button>
+
+          </div>
+        </div>
         <div className="mt-8 pt-6 border-t border-default/60 text-center">
           <p className="text-xs text-secondary">
             {isSignUp ? "Already hold workspace coordinates?" : "Need separate developer nodes?"}{" "}
@@ -236,7 +275,6 @@ else {
               id="button-toggle-mode"
               onClick={() => {
                 setIsSignUp(!isSignUp);
-                onToggleMode();
               }}
               className="text-indigo-400 hover:text-indigo-300 font-semibold transition-all"
             >
