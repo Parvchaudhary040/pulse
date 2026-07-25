@@ -1,69 +1,67 @@
-import api from "../api/api";
+import axios from "axios";
 
-// ==============================
+const API =
+  import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+
+export const getGoogleOAuthUrl = () => `${API.replace(/\/$/, "")}/oauth/google`;
+
+// =====================
 // Register
-// ==============================
-
-export const register = async (userData: {
+// =====================
+export const register = async (data: {
   name: string;
   email: string;
   password: string;
 }) => {
-  const response = await api.post(
-    "/auth/register",
-    userData
-  );
-
+  const response = await axios.post(`${API}/auth/register`, data);
   return response.data;
 };
 
-// ==============================
+// =====================
 // Login
-// ==============================
-
-export const login = async (loginData: {
+// =====================
+export const login = async (data: {
   email: string;
   password: string;
 }) => {
-  const response = await api.post(
-    "/auth/login",
-    loginData
-  );
-
+  const response = await axios.post(`${API}/auth/login`, data);
   return response.data;
 };
 
-// ==============================
+// =====================
 // Current User
-// ==============================
-
+// =====================
 export const getCurrentUser = async () => {
-  const response = await api.get("/auth/me");
+  const token = localStorage.getItem("pulse_token");
+
+  const response = await axios.get(`${API}/auth/me`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 
   return response.data;
 };
 
-// ==============================
+// =====================
 // Change Password
-// ==============================
-
-export const changePassword = async (passwordData: {
+// =====================
+export const changePassword = async (data: {
   currentPassword: string;
   newPassword: string;
 }) => {
-  const response = await api.put(
-    "/auth/change-password",
-    passwordData
+  const token = localStorage.getItem("pulse_token");
+
+  const response = await axios.put(
+    `${API}/auth/change-password`,
+    data,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
   );
 
   return response.data;
 };
-
-// ==============================
-// Logout
-// ==============================
-
-export const logout = () => {
-  localStorage.removeItem("pulse_token");
-  localStorage.removeItem("pulse_user");
-};
+export const __TEST__ = "Auth Service Loaded";

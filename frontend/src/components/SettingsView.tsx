@@ -19,7 +19,10 @@ import {
 
 import {
   changePassword,
+  __TEST__,
 } from "../services/authService";
+
+console.log(__TEST__);
 
 interface SettingsViewProps {
   onUpdateUserName: (name: string) => void;
@@ -110,11 +113,11 @@ export default function SettingsView({
   };
 
   const handleLogout = () => {
-
     logout();
 
-    window.location.reload();
+    localStorage.removeItem("pulse_auth");
 
+    window.location.href = "/";
   };
 
   return (

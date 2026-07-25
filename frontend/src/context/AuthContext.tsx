@@ -1,76 +1,109 @@
 import {
   createContext,
   useContext,
+  useEffect,
   useState,
   ReactNode,
 } from "react";
+import * as authService from "../services/authService";
 
-interface User {
+export interface User {
   id: number;
   name: string;
   email: string;
+  avatar?: string;
+  role?: string;
 }
 
 interface AuthContextType {
   user: User | null;
   token: string | null;
+  loading: boolean;
+  isAuthenticated: boolean;
 
-  login: (user: User, token: string) => void;
+  login: (token: string) => Promise<void>;
   logout: () => void;
 }
 
-const AuthContext =
-  createContext<AuthContextType | null>(null);
+const AuthContext = createContext<AuthContextType>(
+  {} as AuthContextType
+);
 
 export const AuthProvider = ({
   children,
 }: {
   children: ReactNode;
 }) => {
-  const [user, setUser] = useState<User | null>(() => {
-    const saved =
-      localStorage.getItem("pulse_user");
-
-    return saved ? JSON.parse(saved) : null;
-  });
+  const [user, setUser] = useState<User | null>(null);
 
   const [token, setToken] = useState<string | null>(
     localStorage.getItem("pulse_token")
   );
 
-  const login = (
-    user: User,
-    token: string
-  ) => {
+  const [loading, setLoading] = useState(true);
+
+  const login = async (jwt: string) => {
+    localStorage.setItem("pulse_token", jwt);
+
+    setToken(jwt);
+
+    const response = await authService.getCurrentUser();
+
+    setUser(response.user);
+
     localStorage.setItem(
       "pulse_user",
-      JSON.stringify(user)
+      JSON.stringify(response.user)
     );
 
-    localStorage.setItem(
-      "pulse_token",
-      token
-    );
-
-    setUser(user);
-    setToken(token);
+    setLoading(false);
   };
 
   const logout = () => {
-    localStorage.removeItem("pulse_user");
-    localStorage.removeItem("pulse_token");
+      localStorage.clear();
 
-    setUser(null);
-    setToken(null);
+      setUser(null);
+      setToken(null);
+
+      window.location.href = "/login";
   };
+
+  useEffect(() => {
+    const initialize = async () => {
+      const savedToken =
+        localStorage.getItem("pulse_token");
+
+      if (!savedToken) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const response =
+          await authService.getCurrentUser();
+
+        setToken(savedToken);
+
+        setUser(response.user);
+      } catch {
+        logout();
+      }
+
+      setLoading(false);
+    };
+
+    initialize();
+  }, []);
 
   return (
     <AuthContext.Provider
       value={{
         user,
         token,
+        loading,
         login,
         logout,
+        isAuthenticated: !!user,
       }}
     >
       {children}
@@ -78,15 +111,5 @@ export const AuthProvider = ({
   );
 };
 
-export const useAuth = () => {
-  const context =
-    useContext(AuthContext);
-
-  if (!context) {
-    throw new Error(
-      "useAuth must be used inside AuthProvider"
-    );
-  }
-
-  return context;
-};
+export const useAuth = () =>
+  useContext(AuthContext);

@@ -1,4 +1,5 @@
 import { Routes, Route } from "react-router-dom";
+import OAuthSuccess from "../pages/OAuthSuccess";
 
 export default function AppRoutes() {
   return (
@@ -13,6 +14,8 @@ export default function AppRoutes() {
       <Route path="/profile" element={<h1>Profile</h1>} />
 
       <Route path="/settings" element={<h1>Settings</h1>} />
+
+      <Route path="/oauth-success" element={<OAuthSuccess />} />
 
     </Routes>
   );

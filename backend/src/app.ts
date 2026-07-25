@@ -8,11 +8,14 @@ import taskRoutes from "./routes/taskRoutes";
 import authRoutes from "./routes/authRoutes";
 import express from "express";
 import aiRoutes from "./routes/aiRoutes";
+import passport from "./config/passport";
+import oauthRoutes from "./routes/oauthRoutes";
 import cors from "cors";
 
 const app = express();
 
 // Middlewares
+app.use(passport.initialize());
 app.use(
   cors({
     origin: [
@@ -33,6 +36,7 @@ app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/activities", activityRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/ai", aiRoutes);
+app.use("/api/oauth", oauthRoutes);
 
 // Health Check Route
 app.get("/", (req, res) => {
