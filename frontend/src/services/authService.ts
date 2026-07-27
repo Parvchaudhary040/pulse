@@ -83,6 +83,16 @@ export const updateAvatar = async (avatar: string) => {
   return response.data;
 };
 
+export const updateName = async (name: string) => {
+  const response = await axios.put(
+    `${API}/auth/profile`,
+    { name },
+    { headers: authorizedHeaders() }
+  );
+
+  return response.data;
+};
+
 export const deleteAccount = async () => {
   const response = await axios.delete(`${API}/auth/account`, {
     headers: authorizedHeaders(),

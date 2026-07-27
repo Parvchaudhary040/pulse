@@ -6,6 +6,7 @@ import * as dashboardService from "./services/dashboardService";
 import * as projectService from "./services/projectService";
 import ProjectTimelinePage from "./pages/ProjectTimelinePage";
 import * as taskService from "./services/taskService";
+import * as authService from "./services/authService";
 import ProjectModal from "./components/ProjectModal";
 import ProjectsView from "./components/ProjectsView";
 import { getWorkspaceInsight } from "./services/aiService";
@@ -634,8 +635,10 @@ const handleToggleTaskStatusCheckbox = async (
     };
     setActivityLogs(prev => [newLog, ...prev]);
   };
-  const handleUpdateUserNameInSettings = (name: string) => {
-    setUserName(name);
+  const handleUpdateUserNameInSettings = async (name: string) => {
+    const response = await authService.updateName(name);
+    updateUser(response.user);
+    setUserName(response.user.name);
   };
 // ======================
 // RENDER HELPERS
