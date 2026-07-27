@@ -25,7 +25,7 @@ import {
 console.log(__TEST__);
 
 interface SettingsViewProps {
-  onUpdateUserName: (name: string) => void;
+  onUpdateUserName: (name: string) => Promise<void>;
 }
 
 export default function SettingsView({
@@ -88,7 +88,7 @@ export default function SettingsView({
 
   ];
 
-  const handleSaveProfile = (
+  const handleSaveProfile = async (
     e: React.FormEvent
   ) => {
 
@@ -104,11 +104,14 @@ export default function SettingsView({
 
     }
 
-    onUpdateUserName(name);
-
-    notifySuccess(
-      "Profile updated successfully."
-    );
+    try {
+      await onUpdateUserName(name.trim());
+      notifySuccess("Profile updated successfully.");
+    } catch (error: any) {
+      notifyError(
+        error?.response?.data?.message || "Unable to update your profile."
+      );
+    }
 
   };
 
@@ -206,7 +209,12 @@ className="space-y-6"
 
 <img
 
-src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name||"User")}&background=4f46e5&color=ffffff`}
+src={
+  user?.avatar ||
+  `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || "User")}&background=4f46e5&color=ffffff`
+}
+
+alt={`${user?.name || "User"} profile picture`}
 
 className="w-20 h-20 rounded-full"
 

@@ -114,6 +114,21 @@ export const updateAvatar = async (req: AuthRequest, res: Response) => {
   return res.status(result.success ? 200 : 404).json(result);
 };
 
+export const updateName = async (req: AuthRequest, res: Response) => {
+  const { name } = req.body;
+  const trimmedName = typeof name === "string" ? name.trim() : "";
+
+  if (!trimmedName || trimmedName.length > 100) {
+    return res.status(400).json({
+      success: false,
+      message: "Name must be between 1 and 100 characters.",
+    });
+  }
+
+  const result = await authService.updateName(req.user!.id, trimmedName);
+  return res.status(result.success ? 200 : 404).json(result);
+};
+
 export const deleteAccount = async (req: AuthRequest, res: Response) => {
   const result = await authService.deleteAccount(req.user!.id);
   return res.status(result.success ? 200 : 404).json(result);
