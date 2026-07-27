@@ -6,6 +6,7 @@ import {
   getCurrentUser,
   changePassword,
   updateAvatar,
+  updateName,
   deleteAccount,
 } from "../controllers/authController";
 
@@ -36,6 +37,8 @@ router.put(
 );
 
 router.put("/avatar", protect, updateAvatar);
+
+router.put("/profile", protect, updateName);
 
 router.delete("/account", protect, deleteAccount);
 

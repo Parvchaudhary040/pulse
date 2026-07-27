@@ -254,6 +254,24 @@ export const updateAvatar = async (userId: number, avatar: string) => {
   return { success: true, user: result.rows[0] };
 };
 
+export const updateName = async (userId: number, name: string) => {
+  const result = await pool.query(
+    `
+    UPDATE users
+    SET name = $1
+    WHERE id = $2
+    RETURNING id, name, email, role, avatar
+    `,
+    [name, userId]
+  );
+
+  if (result.rows.length === 0) {
+    return { success: false, message: "User not found" };
+  }
+
+  return { success: true, user: result.rows[0] };
+};
+
 export const deleteAccount = async (userId: number) => {
   const client = await pool.connect();
 
