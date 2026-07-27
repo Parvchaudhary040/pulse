@@ -130,7 +130,9 @@ export const getMe = async (
     SELECT
       id,
       name,
-      email
+      email,
+      role,
+      avatar
     FROM users
     WHERE id = $1
     `,
@@ -232,4 +234,45 @@ export const changePassword = async ({
       "Password updated successfully",
   };
 
+};
+
+export const updateAvatar = async (userId: number, avatar: string) => {
+  const result = await pool.query(
+    `
+    UPDATE users
+    SET avatar = $1
+    WHERE id = $2
+    RETURNING id, name, email, role, avatar
+    `,
+    [avatar, userId]
+  );
+
+  if (result.rows.length === 0) {
+    return { success: false, message: "User not found" };
+  }
+
+  return { success: true, user: result.rows[0] };
+};
+
+export const deleteAccount = async (userId: number) => {
+  const client = await pool.connect();
+
+  try {
+    await client.query("BEGIN");
+    await client.query("DELETE FROM projects WHERE user_id = $1", [userId]);
+    const result = await client.query("DELETE FROM users WHERE id = $1", [userId]);
+
+    if (result.rowCount === 0) {
+      await client.query("ROLLBACK");
+      return { success: false, message: "User not found" };
+    }
+
+    await client.query("COMMIT");
+    return { success: true };
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
 };

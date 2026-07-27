@@ -3,7 +3,11 @@ import axios from "axios";
 const API =
   import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
-export const getGoogleOAuthUrl = () => `${API.replace(/\/$/, "")}/oauth/google`;
+export const getGoogleOAuthUrl = () =>
+  `${API.replace(/\/$/, "")}/oauth/google`;
+
+export const getGithubOAuthUrl = () =>
+  `${API.replace(/\/$/, "")}/oauth/github`;
 
 // =====================
 // Register
@@ -61,6 +65,28 @@ export const changePassword = async (data: {
       },
     }
   );
+
+  return response.data;
+};
+
+const authorizedHeaders = () => ({
+  Authorization: `Bearer ${localStorage.getItem("pulse_token")}`,
+});
+
+export const updateAvatar = async (avatar: string) => {
+  const response = await axios.put(
+    `${API}/auth/avatar`,
+    { avatar },
+    { headers: authorizedHeaders() }
+  );
+
+  return response.data;
+};
+
+export const deleteAccount = async () => {
+  const response = await axios.delete(`${API}/auth/account`, {
+    headers: authorizedHeaders(),
+  });
 
   return response.data;
 };
