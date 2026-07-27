@@ -99,3 +99,22 @@ export const changePassword = async (
   return res.status(200).json(result);
 
 };
+
+export const updateAvatar = async (req: AuthRequest, res: Response) => {
+  const { avatar } = req.body;
+
+  if (typeof avatar !== "string" || !avatar.startsWith("data:image/")) {
+    return res.status(400).json({
+      success: false,
+      message: "Please upload a valid image file.",
+    });
+  }
+
+  const result = await authService.updateAvatar(req.user!.id, avatar);
+  return res.status(result.success ? 200 : 404).json(result);
+};
+
+export const deleteAccount = async (req: AuthRequest, res: Response) => {
+  const result = await authService.deleteAccount(req.user!.id);
+  return res.status(result.success ? 200 : 404).json(result);
+};

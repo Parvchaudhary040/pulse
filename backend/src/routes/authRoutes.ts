@@ -5,6 +5,8 @@ import {
   loginUser,
   getCurrentUser,
   changePassword,
+  updateAvatar,
+  deleteAccount,
 } from "../controllers/authController";
 
 import { protect } from "../middleware/authMiddleware";
@@ -32,5 +34,9 @@ router.put(
   protect,
   changePassword
 );
+
+router.put("/avatar", protect, updateAvatar);
+
+router.delete("/account", protect, deleteAccount);
 
 export default router;
