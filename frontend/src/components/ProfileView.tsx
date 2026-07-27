@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useState } from "react";
 import {
   User,
   Mail,
@@ -8,7 +8,10 @@ import {
   ListTodo,
   Layers,
   Award,
+  Trash2,
+  Upload,
 } from "lucide-react";
+import * as authService from "../services/authService";
 
 import {
   User as UserType,
@@ -20,12 +23,62 @@ import {
 interface ProfileViewProps {
   user: UserType;
   tasks: Task[];
+  onAccountDeleted: () => void;
+  onUserUpdated: (user: UserType) => void;
 }
 
 export default function ProfileView({
   user,
   tasks,
+  onAccountDeleted,
+  onUserUpdated,
 }: ProfileViewProps) {
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [profileError, setProfileError] = useState("");
+
+  const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/") || file.size > 3 * 1024 * 1024) {
+      setProfileError("Choose an image smaller than 3 MB.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = async () => {
+      try {
+        setIsUploading(true);
+        setProfileError("");
+        const response = await authService.updateAvatar(reader.result as string);
+        onUserUpdated(response.user);
+      } catch {
+        setProfileError("We couldn't update your profile picture. Please try again.");
+      } finally {
+        setIsUploading(false);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleDeleteAccount = async () => {
+    const confirmed = window.confirm(
+      "Delete your account and all of its projects? This cannot be undone."
+    );
+    if (!confirmed) return;
+
+    try {
+      setIsDeleting(true);
+      setProfileError("");
+      await authService.deleteAccount();
+      onAccountDeleted();
+    } catch {
+      setProfileError("We couldn't delete your account. Please try again.");
+      setIsDeleting(false);
+    }
+  };
 
   // ===========================
   // Statistics
@@ -93,6 +146,25 @@ export default function ProfileView({
                 alt={user.name}
                 className="w-36 h-36 rounded-full border-4 border-indigo-600 object-cover"
               />
+
+              <div className="flex flex-col gap-2 text-center">
+                <input
+                  ref={imageInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleAvatarChange}
+                  className="hidden"
+                />
+                <button
+                  type="button"
+                  onClick={() => imageInputRef.current?.click()}
+                  disabled={isUploading}
+                  className="inline-flex items-center justify-center gap-2 rounded-lg border border-default bg-app px-4 py-2 text-sm font-medium hover:bg-surface-2 disabled:opacity-50"
+                >
+                  <Upload size={16} />
+                  {isUploading ? "Uploading..." : "Change photo"}
+                </button>
+              </div>
 
               {/* User Details */}
 
@@ -215,6 +287,25 @@ export default function ProfileView({
 
             </div>
 
+          </div>
+
+          <div className="mt-8 rounded-2xl border border-red-500/30 bg-red-950/20 p-6">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h2 className="font-bold text-red-200">Delete account</h2>
+                <p className="mt-1 text-sm text-red-200/70">Permanently remove your account, projects, and tasks.</p>
+              </div>
+              <button
+                type="button"
+                onClick={handleDeleteAccount}
+                disabled={isDeleting}
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-500 disabled:opacity-50"
+              >
+                <Trash2 size={16} />
+                {isDeleting ? "Deleting..." : "Delete account"}
+              </button>
+            </div>
+            {profileError && <p className="mt-4 text-sm text-red-200">{profileError}</p>}
           </div>
           {/* Bottom Section */}
 

@@ -99,6 +99,10 @@ try {
     window.location.assign(authService.getGoogleOAuthUrl());
   };
 
+  const handleGithubLogin = () => {
+    window.location.assign(authService.getGithubOAuthUrl());
+  };
+
   return (
     <div className="bg-app text-[#f4f6fe] min-h-screen flex flex-col justify-center items-center px-6 relative selection:bg-[#4f46e5]">
       {/* Glow lines */}
@@ -259,8 +263,8 @@ try {
 
             <button
               type="button"
-              disabled
-              className="h-11 rounded-xl border border-default bg-app opacity-50 cursor-not-allowed flex items-center justify-center gap-2"
+              onClick={handleGithubLogin}
+              className="h-11 rounded-xl border border-default bg-app hover:bg-surface transition-all flex items-center justify-center gap-2"
             >
               <Github className="w-4 h-4" />
               GitHub

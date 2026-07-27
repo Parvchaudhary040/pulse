@@ -23,6 +23,7 @@ import {
 import { Task, TaskStatus, Project, ActivityLog, Notification, Priority, AIWorkspaceInsight } from "./types";
 // Inner-components imports
 import SimpleLoginSignup from "./components/SimpleLoginSignup";
+import LandingPage from "./components/LandingPage";
 import Sidebar from "./components/Sidebar";
 import Header from "./components/Header";
 import DashboardView from "./components/DashboardView";
@@ -33,7 +34,7 @@ import MobilePreview from "./components/MobilePreview";
 import TaskModal from "./components/TaskModal";
 import { useAuth } from "./context/AuthContext";
 import OAuthSuccess from "./pages/OAuthSuccess";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 // ======================
 // APP COMPONENT
 // ======================
@@ -47,11 +48,13 @@ export default function App() {
   closeAI,
 } = useAI();
   const location = useLocation();
+  const navigate = useNavigate();
   const {
   user,
   isAuthenticated,
   loading,
   logout,
+  updateUser,
 } = useAuth();
   const { theme } = useTheme();
   const [dashboardStats, setDashboardStats] =
@@ -276,6 +279,7 @@ useEffect(() => {
 // ======================
 const handleLoginSuccess = async () => {
   setCurrentTab("dashboard");
+  navigate("/dashboard", { replace: true });
 };
 
 const handleLogout = () => {
@@ -680,6 +684,8 @@ const handleToggleTaskStatusCheckbox = async (
             <ProfileView
               user={user!}
               tasks={visibleTasks}
+              onAccountDeleted={handleLogout}
+              onUserUpdated={updateUser}
             />
           );
       case "settings":
@@ -737,10 +743,23 @@ if (loading) {
     );
 }
 
+  if (location.pathname === "/") {
+    const appDestination = isAuthenticated ? "/dashboard" : "/login";
+
+    return (
+      <LandingPage
+        onEnterApp={() => navigate(appDestination)}
+        onGoToLogin={() => navigate(appDestination)}
+        onGoToSignup={() => navigate(isAuthenticated ? "/dashboard" : "/signup")}
+      />
+    );
+  }
+
   if (!isAuthenticated) {
+
     return (
       <SimpleLoginSignup
-        initialIsSignUp={false}
+        initialIsSignUp={location.pathname === "/signup"}
         onLoginSuccess={handleLoginSuccess}
       />
     );

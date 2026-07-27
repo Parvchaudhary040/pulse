@@ -23,6 +23,7 @@ interface AuthContextType {
 
   login: (token: string) => Promise<void>;
   logout: () => void;
+  updateUser: (user: User) => void;
 }
 
 const AuthContext = createContext<AuthContextType>(
@@ -68,6 +69,11 @@ export const AuthProvider = ({
       window.location.href = "/login";
   };
 
+  const updateUser = (updatedUser: User) => {
+    setUser(updatedUser);
+    localStorage.setItem("pulse_user", JSON.stringify(updatedUser));
+  };
+
   useEffect(() => {
     const initialize = async () => {
       const savedToken =
@@ -103,6 +109,7 @@ export const AuthProvider = ({
         loading,
         login,
         logout,
+        updateUser,
         isAuthenticated: !!user,
       }}
     >
