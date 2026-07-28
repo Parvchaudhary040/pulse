@@ -52,7 +52,8 @@ export const googleLogin = async (profile: any) => {
         password,
         provider,
         provider_id,
-        avatar
+        avatar,
+        role
       )
       VALUES
       (
@@ -61,7 +62,8 @@ export const googleLogin = async (profile: any) => {
         '',
         'google',
         $3,
-        $4
+        $4,
+        'Member'
       )
       RETURNING *
       `,
@@ -120,8 +122,8 @@ export const githubLogin = async (profile: any) => {
   } else {
     const createdUser = await pool.query(
       `
-      INSERT INTO users (name, email, password, provider, provider_id, avatar)
-      VALUES ($1, $2, '', 'github', $3, $4)
+      INSERT INTO users (name, email, password, provider, provider_id, avatar, role)
+      VALUES ($1, $2, '', 'github', $3, $4, 'Member')
       RETURNING *
       `,
       [

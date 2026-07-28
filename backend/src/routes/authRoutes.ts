@@ -8,9 +8,11 @@ import {
   updateAvatar,
   updateName,
   deleteAccount,
+  getUsers,
+  updateUserRole,
 } from "../controllers/authController";
 
-import { protect } from "../middleware/authMiddleware";
+import { allowRoles, protect } from "../middleware/authMiddleware";
 
 const router = Router();
 
@@ -41,5 +43,8 @@ router.put("/avatar", protect, updateAvatar);
 router.put("/profile", protect, updateName);
 
 router.delete("/account", protect, deleteAccount);
+
+router.get("/users", protect, allowRoles("Owner", "Admin"), getUsers);
+router.put("/users/:id/role", protect, allowRoles("Owner", "Admin"), updateUserRole);
 
 export default router;

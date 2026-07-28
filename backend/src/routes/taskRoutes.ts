@@ -1,4 +1,4 @@
-import { protect } from "../middleware/authMiddleware";
+import { allowRoles, canManageTask, protect } from "../middleware/authMiddleware";
 import { Router } from "express";
 import {
   createTask,
@@ -9,10 +9,10 @@ import {
 
 const router = Router();
 
-router.post("/", protect, createTask);
+router.post("/", protect, allowRoles("Owner", "Admin", "Manager", "Member"), createTask);
 router.get("/", protect, getTasks);
-router.put("/:id", protect, updateTask);
-router.delete("/:id", protect, deleteTask);
+router.put("/:id", protect, canManageTask, updateTask);
+router.delete("/:id", protect, canManageTask, deleteTask);
 
 
 export default router;
