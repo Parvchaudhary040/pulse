@@ -118,6 +118,7 @@ ALTER SEQUENCE public.activity_logs_id_seq OWNED BY public.activity_logs.id;
 
 CREATE TABLE public.notifications (
     id integer NOT NULL,
+    user_id integer NOT NULL,
     title character varying(255) NOT NULL,
     message text NOT NULL,
     type character varying(50) DEFAULT 'info'::character varying,
@@ -252,7 +253,7 @@ CREATE TABLE public.users (
     email character varying(255) NOT NULL,
     password character varying(255),
     created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
-    role character varying(100) DEFAULT 'AI Engineer'::character varying,
+    role character varying(100) DEFAULT 'Member'::character varying,
     avatar text,
     bio text,
     skills text[],
@@ -388,7 +389,7 @@ COPY public.activity_logs (id, user_name, action, target_type, target_name, deta
 -- Data for Name: notifications; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.notifications (id, title, message, type, is_read, created_at) FROM stdin;
+COPY public.notifications (id, user_id, title, message, type, is_read, created_at) FROM stdin;
 1	Task Created	Docker Setup task created successfully.	success	t	2026-06-25 10:19:47.436302
 \.
 
@@ -595,4 +596,3 @@ ALTER TABLE ONLY public.tasks
 --
 
 \unrestrict sHLY2h8bH4zvAFJwZj7tQXOFObj0DERDMjq15ciTGF8oZONa0KPHBkfaxjGdJDk
-
