@@ -294,7 +294,7 @@ Role
 
 disabled
 
-value="AI Engineer"
+value={user?.role || "Member"}
 
 className="w-full rounded-xl border border-default bg-surface-2 px-4 py-3 text-secondary"
 

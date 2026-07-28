@@ -100,4 +100,29 @@ export const deleteAccount = async () => {
 
   return response.data;
 };
+
+export interface ManagedUser {
+  id: number;
+  name: string;
+  email: string;
+  role: "Owner" | "Admin" | "Manager" | "Member" | "Viewer";
+  avatar?: string;
+  created_at: string;
+}
+
+export const getUsers = async () => {
+  const response = await axios.get(`${API}/auth/users`, {
+    headers: authorizedHeaders(),
+  });
+  return response.data as { success: boolean; users: ManagedUser[] };
+};
+
+export const updateUserRole = async (id: number, role: ManagedUser["role"]) => {
+  const response = await axios.put(
+    `${API}/auth/users/${id}/role`,
+    { role },
+    { headers: authorizedHeaders() }
+  );
+  return response.data as { success: boolean; user: ManagedUser };
+};
 export const __TEST__ = "Auth Service Loaded";

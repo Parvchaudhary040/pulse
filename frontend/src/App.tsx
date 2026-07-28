@@ -5,6 +5,7 @@ import * as activityService from "./services/activityService";
 import * as dashboardService from "./services/dashboardService";
 import * as projectService from "./services/projectService";
 import ProjectTimelinePage from "./pages/ProjectTimelinePage";
+import UserManagementPage from "./pages/UserManagementPage";
 import * as taskService from "./services/taskService";
 import * as authService from "./services/authService";
 import ProjectModal from "./components/ProjectModal";
@@ -14,6 +15,9 @@ import { useTheme } from "./context/ThemeContext";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import {
+  getNotifications,
+  markAllNotificationsRead,
+  markNotificationRead,
   notifyError,
   notifyInfo,
 } from "./services/notificationService";
@@ -74,6 +78,7 @@ export default function App() {
     return localStorage.getItem("pulse_last_tab") || "dashboard";
   });
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [taskSearch, setTaskSearch] = useState("");
   // Load / Persist Projects State
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProjectId, setSelectedProjectId] =
@@ -159,12 +164,22 @@ const loadDashboard = async () => {
   }
 };
 
+const loadNotifications = async () => {
+  try {
+    setNotifications(await getNotifications());
+  } catch (error) {
+    console.error("Failed to load notifications", error);
+    setNotifications([]);
+  }
+};
+
 const loadAllData = async () => {
   try {
     await loadProjects();
     await loadTasks();
     await loadDashboard();
     await loadActivities();
+    await loadNotifications();
   } catch (error) {
     console.error("Failed to load workspace:", error);
   }
@@ -306,12 +321,30 @@ const handleLogout = () => {
 };
 
   // Notification Operations
-  const handleMarkNotificationRead = (id: string) => {
-    setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+  const handleMarkNotificationRead = async (id: string) => {
+    try {
+      const notification = await markNotificationRead(id);
+      setNotifications((prev) =>
+        prev.map((item) =>
+          item.id === id ? notification : item
+        )
+      );
+    } catch (error) {
+      console.error("Failed to mark notification as read", error);
+      notifyError("Unable to mark notification as read.");
+    }
   };
 
-  const handleMarkAllNotificationsRead = () => {
-    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+  const handleMarkAllNotificationsRead = async () => {
+    try {
+      await markAllNotificationsRead();
+      setNotifications((prev) =>
+        prev.map((notification) => ({ ...notification, read: true }))
+      );
+    } catch (error) {
+      console.error("Failed to mark notifications as read", error);
+      notifyError("Unable to mark notifications as read.");
+    }
   };
 
   // Task operations: Adding & Modifying cards
@@ -367,7 +400,7 @@ const handleSaveTask = async (
       // CREATE TASK
       // =====================
 
-      await taskService.createTask({
+      const response = await taskService.createTask({
         title: taskData.title,
         description: taskData.description,
         status: taskData.status,
@@ -375,6 +408,11 @@ const handleSaveTask = async (
         project_id: taskData.project_id || null,
         due_date: taskData.due_date || null,
       });
+
+      setTasks((previousTasks) => [
+        response.task,
+        ...previousTasks,
+      ]);
 
       await activityService.createActivity({
         user_name: userName,
@@ -667,6 +705,8 @@ const handleToggleTaskStatusCheckbox = async (
         return (
           <ProjectBoardView
             tasks={visibleTasks}
+            searchQuery={taskSearch}
+            onSearchQueryChange={setTaskSearch}
             onAddTask={handleOpenNewTaskModal}
             onEditTask={handleOpenEditTaskModal}
             onDeleteTask={handleDeleteTask}
@@ -697,6 +737,8 @@ const handleToggleTaskStatusCheckbox = async (
             onUpdateUserName={handleUpdateUserNameInSettings}
           />
         );
+      case "user-management":
+        return <UserManagementPage />;
       case "mobile":
         return (
           <MobilePreview
@@ -812,6 +854,10 @@ if (loading) {
           onMarkNotificationRead={handleMarkNotificationRead}
           onMarkAllNotificationsRead={handleMarkAllNotificationsRead}
           onOpenTaskModal={handleOpenNewTaskModal}
+          onSearchTasks={(query) => {
+            setTaskSearch(query);
+            setCurrentTab("board");
+          }}
           onToggleAI={toggleAI}
         />
 

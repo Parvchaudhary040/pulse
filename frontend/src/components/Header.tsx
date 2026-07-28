@@ -15,6 +15,7 @@ interface HeaderProps {
   onMarkNotificationRead: (id: string) => void;
   onMarkAllNotificationsRead: () => void;
   onOpenTaskModal: () => void;
+  onSearchTasks: (query: string) => void;
 
   onToggleAI: () => void;
 }
@@ -25,6 +26,7 @@ export default function Header({
   onMarkNotificationRead,
   onMarkAllNotificationsRead,
   onOpenTaskModal,
+  onSearchTasks,
   onToggleAI,
 }: HeaderProps) {
 
@@ -124,11 +126,7 @@ setSearchFocused(false)
 onKeyDown={(e)=>{
 
 if(e.key==="Enter"){
-
-console.log(
-"Searching:",
-e.currentTarget.value
-);
+  onSearchTasks(e.currentTarget.value);
 
 }
 

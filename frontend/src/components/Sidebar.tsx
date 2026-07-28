@@ -9,6 +9,7 @@ import {
   LogOut,
   FolderOpen,
   MoreVertical,
+  Users,
 } from "lucide-react";
 
 import { Project } from "../types";
@@ -27,7 +28,6 @@ interface SidebarProps {
   activeTasksCount: number;
   onLogout: () => void;
 
-  onLogout: () => void;
   onOpenProjectModal: () => void;
   onEditProject: (project: Project) => void;
   onDeleteProject: (project: Project) => void;
@@ -52,6 +52,7 @@ export default function Sidebar({
   onDeleteProject,
 }: SidebarProps) {
   const { user } = useAuth();
+  const canManageProjects = ["Owner", "Admin", "Manager"].includes(user?.role || "Member");
   const [openMenu, setOpenMenu] =
   React.useState<number | null>(null);
 
@@ -86,6 +87,11 @@ export default function Sidebar({
       id: "mobile",
       label: "Mobile Preview",
       icon: Smartphone,
+    },
+    {
+        id: "user-management",
+        label: "User Management",
+        icon: Users,
     },
   ];
 
@@ -138,63 +144,62 @@ export default function Sidebar({
 
           {menuItems.map((item) => {
 
-            const Icon = item.icon;
+              const Icon = item.icon;
 
-            const active = currentTab === item.id;
+              const active = currentTab === item.id;
 
-            return (
+              return (
 
-              <button
-                key={item.id}
-                onClick={() => {
-                  console.log("Clicked menu:", item.id);
-                  setCurrentTab(item.id);
-                }}
-                className={`flex h-10 w-full items-center justify-between rounded-xl border px-3 text-xs font-semibold transition-all ${
-                  active
-                    ? "border-indigo-500 bg-indigo-600/15 text-primary"
-                    : "border-transparent hover:bg-surface-2"
-                }`}
-              >
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    console.log("Clicked menu:", item.id);
+                    setCurrentTab(item.id);
+                  }}
+                  className={`flex h-10 w-full items-center justify-between rounded-xl border px-3 text-xs font-semibold transition-all ${
+                    active
+                      ? "border-indigo-500 bg-indigo-600/15 text-primary"
+                      : "border-transparent hover:bg-surface-2"
+                  }`}
+                >
 
-                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3">
 
-                  <Icon
-                    size={16}
-                    className={
-                      active
-                        ? "text-indigo-500"
-                        : "text-secondary"
-                    }
-                  />
-
-                  <span>{item.label}</span>
-
-                </div>
-
-                {item.badge !== undefined &&
-                  item.badge > 0 && (
-
-                    <span
-                      className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                    <Icon
+                      size={16}
+                      className={
                         active
-                          ? "bg-indigo-600 text-primary"
-                          : "bg-surface-2 text-secondary"
-                      }`}
-                    >
+                          ? "text-indigo-500"
+                          : "text-secondary"
+                      }
+                    />
 
-                      {item.badge}
+                    <span>{item.label}</span>
 
-                    </span>
+                  </div>
 
-                  )}
+                  {item.badge !== undefined &&
+                    item.badge > 0 && (
 
-              </button>
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                          active
+                            ? "bg-indigo-600 text-primary"
+                            : "bg-surface-2 text-secondary"
+                        }`}
+                      >
 
-            );
+                        {item.badge}
 
-          })}
+                      </span>
 
+                    )}
+
+                </button>
+
+              );
+
+            })}
         </div>
 
         {/* Projects */}
@@ -207,12 +212,12 @@ export default function Sidebar({
               Projects
             </span>
 
-            <button
+            {canManageProjects && <button
               onClick={onOpenProjectModal}
               className="flex h-6 w-6 items-center justify-center rounded-md bg-indigo-600 text-white transition hover:bg-indigo-700"
             >
               +
-            </button>
+            </button>}
 
           </div>
 
@@ -286,7 +291,7 @@ export default function Sidebar({
                   
                 </div>
 
-                <div className="relative">
+                {canManageProjects && <div className="relative">
 
                   <button
                     onClick={(e) => {
@@ -342,7 +347,7 @@ export default function Sidebar({
 
                   )}
 
-                </div>
+                </div>}
 
               </button>
 

@@ -25,6 +25,7 @@ import {
 import { toast } from "react-toastify";
 import SortableTaskCard from "./SortableTaskCard";
 import DroppableColumn from "./DroppableColumn";
+import { useAuth } from "../context/AuthContext";
 const statusOrder = [
   TaskStatus.BACKLOG,
   TaskStatus.TODO,
@@ -34,6 +35,8 @@ const statusOrder = [
 
 interface ProjectBoardViewProps {
   tasks: Task[];
+  searchQuery: string;
+  onSearchQueryChange: (query: string) => void;
   onAddTask: () => void;
   onEditTask: (task: Task) => void;
   onDeleteTask: (id: number) => void;
@@ -45,11 +48,15 @@ interface ProjectBoardViewProps {
 
 export default function ProjectBoardView({
   tasks,
+  searchQuery,
+  onSearchQueryChange,
   onAddTask,
   onEditTask,
   onDeleteTask,
   onUpdateTaskStatus,
 }: ProjectBoardViewProps) {
+  const { user } = useAuth();
+  const canCreateTask = user?.role !== "Viewer";
   const totalTasks = tasks.length;
   const backlogCount = tasks.filter(
     t => t.status === TaskStatus.BACKLOG
@@ -63,7 +70,6 @@ export default function ProjectBoardView({
   const doneCount = tasks.filter(
     t => t.status === TaskStatus.DONE
   ).length;
-  const [search, setSearch] = useState("");
   const [activeTask, setActiveTask] =
     useState<Task | null>(null);
   const sensors = useSensors(
@@ -190,13 +196,13 @@ return (
         </p>
       </div>
 
-      <button
+      {canCreateTask && <button
         onClick={onAddTask}
         className="flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 font-semibold text-white shadow-lg shadow-indigo-500/20 transition hover:scale-105 hover:bg-indigo-700"
       >
         <Plus size={18} />
         New Task
-      </button>
+      </button>}
 
     </div>
 
@@ -209,8 +215,8 @@ return (
       />
 
       <input
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
+        value={searchQuery}
+        onChange={(e) => onSearchQueryChange(e.target.value)}
         placeholder="Search tasks..."
         className="w-full bg-surface border border-default rounded-xl py-3 pl-10 pr-4 outline-none focus:border-indigo-500"
       />
@@ -339,10 +345,10 @@ return (
             const matchesSearch =
               task.title
                 .toLowerCase()
-                .includes(search.toLowerCase()) ||
+                .includes(searchQuery.toLowerCase()) ||
               task.description
                 .toLowerCase()
-                .includes(search.toLowerCase());
+                .includes(searchQuery.toLowerCase());
 
             return matchesStatus && matchesSearch;
           });
