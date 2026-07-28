@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import * as taskService from "../services/taskService";
 import * as activityService from "../services/activityService";
+import * as notificationService from "../services/notificationService";
 export const createTask = async (
   req: Request,
   res: Response
@@ -17,6 +18,13 @@ await activityService.createActivity({
   target_type: "Task",
   target_name: task.title,
   details: `Created task "${task.title}"`,
+});
+
+await notificationService.createNotification({
+  user_id: req.user!.id,
+  title: "Task created",
+  message: `\"${task.title}\" was added to your workspace.`,
+  type: "success",
 });
 
 res.status(201).json({
@@ -64,7 +72,8 @@ export const deleteTask = async (
     const task =
     await taskService.deleteTask(
       Number(req.params.id),
-      req.user!.id
+      req.user!.id,
+      ["Owner", "Admin", "Manager"].includes(req.user!.role)
     );
     if (task) {
   await activityService.createActivity({
@@ -94,7 +103,8 @@ export const updateTask = async (
     const task = await taskService.updateTask(
       Number(req.params.id),
       req.body,
-      req.user!.id
+      req.user!.id,
+      ["Owner", "Admin", "Manager"].includes(req.user!.role)
     );
 
     if (!task) {

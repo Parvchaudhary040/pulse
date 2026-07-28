@@ -86,16 +86,17 @@ export const getTasks = async (
 // =======================
 export const deleteTask = async (
   id: number,
-  userId: number
+  userId: number,
+  canManageAnyTask = false
 ) => {
   const result = await pool.query(
     `
     DELETE FROM tasks
     WHERE id = $1
-      AND user_id = $2
+      AND ($2::boolean OR user_id = $3)
     RETURNING *;
     `,
-    [id, userId]
+    [id, canManageAnyTask, userId]
   );
 
   return result.rows[0];
@@ -107,7 +108,8 @@ export const deleteTask = async (
 export const updateTask = async (
   id: number,
   taskData: UpdateTaskData,
-  userId: number
+  userId: number,
+  canManageAnyTask = false
 ) => {
   const result = await pool.query(
     `
@@ -128,7 +130,7 @@ export const updateTask = async (
 
     updated_at = CURRENT_TIMESTAMP
     WHERE id = $7
-      AND user_id = $8
+      AND ($8::boolean OR user_id = $9)
     RETURNING *;
     `,
     [
@@ -141,6 +143,7 @@ export const updateTask = async (
     taskData.due_date ?? null,
 
     id,
+    canManageAnyTask,
     userId,
     ]
   );

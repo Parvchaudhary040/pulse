@@ -133,3 +133,47 @@ export const deleteAccount = async (req: AuthRequest, res: Response) => {
   const result = await authService.deleteAccount(req.user!.id);
   return res.status(result.success ? 200 : 404).json(result);
 };
+
+const validRoles = ["Owner", "Admin", "Manager", "Member", "Viewer"];
+
+export const getUsers = async (_req: Request, res: Response) => {
+  const users = await authService.getUsers();
+  return res.status(200).json({ success: true, users });
+};
+
+import { Request, Response } from "express";
+
+// keep your other imports...
+
+export const updateUserRole = async (req: Request, res: Response) => {
+  const { role } = req.body;
+  const targetUserId = Number(req.params.id);
+
+  if (!validRoles.includes(role)) {
+    return res.status(400).json({
+      success: false,
+      message: "Select a valid role.",
+    });
+  }
+
+  // authenticated user from protect middleware
+  const currentUser = (req as Request & {
+    user?: { id: number; role: string };
+  }).user;
+
+  if (!currentUser) {
+    return res.status(401).json({
+      success: false,
+      message: "Unauthorized",
+    });
+  }
+
+  const result = await authService.updateUserRole(
+    currentUser.id,
+    currentUser.role,
+    targetUserId,
+    role
+  );
+
+  return res.status(result.success ? 200 : 400).json(result);
+};

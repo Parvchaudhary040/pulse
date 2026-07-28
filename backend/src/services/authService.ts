@@ -15,6 +15,14 @@ interface ChangePasswordData {
   newPassword: string;
 }
 
+const roles = ["Owner", "Admin", "Manager", "Member", "Viewer"] as const;
+type Role = (typeof roles)[number];
+
+const normalizeRole = (role: unknown): Role =>
+  typeof role === "string" && roles.includes(role as Role)
+    ? (role as Role)
+    : "Member";
+
 // ==============================
 // Register User
 // ==============================
@@ -46,8 +54,8 @@ export const register = async (
   const newUser = await pool.query(
     `
     INSERT INTO users
-    (name, email, password)
-    VALUES ($1, $2, $3)
+    (name, email, password, role)
+    VALUES ($1, $2, $3, 'Member')
     RETURNING id, name, email
     `,
     [
@@ -104,6 +112,7 @@ export const login = async (loginData: {
   }
 
   const token = generateToken(user.id);
+  const role = normalizeRole(user.role);
 
   return {
     success: true,
@@ -113,6 +122,8 @@ export const login = async (loginData: {
       id: user.id,
       name: user.name,
       email: user.email,
+      role,
+      avatar: user.avatar,
     },
   };
 };
@@ -148,7 +159,10 @@ export const getMe = async (
 
   return {
     success: true,
-    user: result.rows[0],
+    user: {
+      ...result.rows[0],
+      role: normalizeRole(result.rows[0].role),
+    },
   };
 
 };
@@ -293,4 +307,104 @@ export const deleteAccount = async (userId: number) => {
   } finally {
     client.release();
   }
+};
+
+export const getUsers = async () => {
+  const result = await pool.query(
+    `
+    SELECT
+      id,
+      name,
+      email,
+      CASE
+        WHEN role IN ('Owner', 'Admin', 'Manager', 'Member', 'Viewer') THEN role
+        ELSE 'Member'
+      END AS role,
+      avatar,
+      created_at
+    FROM users
+    ORDER BY created_at ASC
+    `
+  );
+
+  return result.rows;
+};
+
+export const updateUserRole = async (
+  currentUserId: number,
+  currentUserRole: string,
+  targetUserId: number,
+  newRole: string
+) => {
+  // Prevent changing your own role
+  if (currentUserId === targetUserId) {
+    return {
+      success: false,
+      message: "You cannot change your own role.",
+    };
+  }
+
+  // Get the target user's current role
+  const existingUser = await pool.query(
+    `
+    SELECT id, role
+    FROM users
+    WHERE id = $1
+    `,
+    [targetUserId]
+  );
+
+  if (existingUser.rows.length === 0) {
+    return {
+      success: false,
+      message: "User not found",
+    };
+  }
+
+  const targetRole = existingUser.rows[0].role;
+
+  // Admin cannot modify Owner
+  if (
+    currentUserRole === "Admin" &&
+    targetRole === "Owner"
+  ) {
+    return {
+      success: false,
+      message: "Admins cannot modify the Owner.",
+    };
+  }
+  
+  // Admin cannot promote anyone to Owner
+  if (
+    currentUserRole === "Admin" &&
+    newRole === "Owner"
+  ) {
+    return {
+      success: false,
+      message: "Only the Owner can assign the Owner role.",
+    };
+  }
+  // Nobody can change the Owner's role
+  if (targetRole === "Owner") {
+    return {
+      success: false,
+      message: "Owner role cannot be modified.",
+    };
+  }
+
+  const result = await pool.query(
+    `
+    UPDATE users
+    SET role = $1
+    WHERE id = $2
+    RETURNING id, name, email, role, avatar, created_at
+    `,
+    [newRole, targetUserId]
+  );
+
+  return {
+    success: true,
+    message: "Role updated successfully.",
+    user: result.rows[0],
+  };
 };

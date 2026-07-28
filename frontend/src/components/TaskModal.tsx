@@ -9,7 +9,7 @@ interface TaskModalProps {
     taskData: Omit<Task, "id" | "createdAt"> & {
       id?: string;
     }
-  ) => void;
+  ) => Promise<void>;
   editingTask?: Task | null;
   projects: Project[];
 }
@@ -66,7 +66,7 @@ export default function TaskModal({
 
   if (!isOpen) return null;
 
-  const handleSubmit = (
+  const handleSubmit = async (
     e: React.FormEvent
   ) => {
 
@@ -82,7 +82,7 @@ export default function TaskModal({
       return;
     }
 
-    onSave({
+    await onSave({
       id: editingTask?.id,
       title,
       description,

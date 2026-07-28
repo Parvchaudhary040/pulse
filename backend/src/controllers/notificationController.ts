@@ -7,7 +7,10 @@ export const createNotification = async (
 ) => {
   try {
     const notification =
-      await notificationService.createNotification(req.body);
+      await notificationService.createNotification({
+        ...req.body,
+        user_id: req.user!.id,
+      });
 
     res.status(201).json({
       success: true,
@@ -29,7 +32,7 @@ export const getNotifications = async (
 ) => {
   try {
     const notifications =
-      await notificationService.getNotifications();
+      await notificationService.getNotifications(req.user!.id);
 
     res.status(200).json({
       success: true,
@@ -52,7 +55,8 @@ export const markNotificationRead = async (
   try {
     const notification =
       await notificationService.markAsRead(
-        Number(req.params.id)
+        Number(req.params.id),
+        req.user!.id
       );
 
     res.status(200).json({
@@ -65,6 +69,27 @@ export const markNotificationRead = async (
     res.status(500).json({
       success: false,
       message: "Failed to update notification",
+    });
+  }
+};
+
+export const markAllNotificationsRead = async (
+  _req: Request,
+  res: Response
+) => {
+  try {
+    const notifications = await notificationService.markAllAsRead(req.user!.id);
+
+    res.status(200).json({
+      success: true,
+      notifications,
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to update notifications",
     });
   }
 };
