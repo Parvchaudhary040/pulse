@@ -65,7 +65,7 @@ Open:
 ## 📸 Live Demo
 
 <a href="" target="_blank">
-  <img src="/public/dashboard.png" alt="Preview" width="100%">
+  <img src="/public/landingpage.png" alt="Preview" width="100%">
 </a>
 
 ## 🔒 Role Permissions
