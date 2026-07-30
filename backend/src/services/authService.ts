@@ -30,13 +30,15 @@ const normalizeRole = (role: unknown): Role =>
 export const register = async (
   userData: Omit<User, "id">
 ) => {
+  const email = userData.email.trim().toLowerCase();
+
   const existingUser = await pool.query(
     `
     SELECT *
     FROM users
     WHERE email = $1
     `,
-    [userData.email]
+    [email]
   );
 
   if (existingUser.rows.length > 0) {
@@ -60,7 +62,7 @@ export const register = async (
     `,
     [
       userData.name,
-      userData.email,
+      email,
       hashedPassword,
     ]
   );
@@ -80,13 +82,15 @@ export const login = async (loginData: {
   email: string;
   password: string;
 }) => {
+  const email = loginData.email.trim().toLowerCase();
+
   const result = await pool.query(
     `
     SELECT *
     FROM users
     WHERE email = $1
     `,
-    [loginData.email]
+    [email]
   );
 
   const user = result.rows[0];

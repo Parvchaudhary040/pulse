@@ -344,31 +344,6 @@ ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_
 --
 
 COPY public.activities (id, user_id, action, target_type, target_name, details, created_at) FROM stdin;
-1	3	Created Task	Task	pulse enterprises	Created task "pulse enterprises"	2026-06-29 11:29:06.80613
-2	3	Created Task	Task	python	Created task "python"	2026-07-02 11:36:47.074639
-3	3	created task	task	python	Created "python"	2026-07-02 11:36:47.087014
-4	3	Deleted Task	Task	python	Deleted task "python"	2026-07-02 11:38:21.299818
-5	3	deleted task	task	python	Deleted "python"	2026-07-02 11:38:21.323525
-6	3	Created Task	Task	python	Created task "python"	2026-07-02 12:56:05.455597
-7	3	created task	task	python	Created "python"	2026-07-02 12:56:05.47234
-8	3	Deleted Task	Task	python	Deleted task "python"	2026-07-02 12:56:09.117895
-9	3	deleted task	task	python	Deleted "python"	2026-07-02 12:56:09.131645
-10	3	updated task	task	pulse enterprises	Updated "pulse enterprises"	2026-07-02 13:13:06.653316
-11	3	updated task	task	figma	Updated "figma"	2026-07-05 23:14:45.41316
-12	3	updated task	task	pulse enterprises	Updated "pulse enterprises"	2026-07-05 23:15:02.312843
-13	3	updated task	task	pulse enterprises	Updated "pulse enterprises"	2026-07-06 00:09:12.710998
-14	3	Created Task	Task	python	Created task "python"	2026-07-06 00:19:21.949657
-15	3	created task	task	python	Created "python"	2026-07-06 00:19:21.959685
-16	3	updated task	task	figma	Updated "figma"	2026-07-06 00:29:16.639093
-17	3	Created Task	Task	software developer 	Created task "software developer "	2026-07-06 16:29:42.149949
-18	3	created task	task	software developer 	Created "software developer "	2026-07-06 16:29:42.162996
-19	3	Created Project	Project	Ai  Project	Created project "Ai  Project"	2026-07-07 23:46:15.714918
-20	3	Updated Project	Project	Ai  Projects	Updated project "Ai  Projects"	2026-07-08 23:04:03.985367
-21	3	Deleted Project	Project	Ai  Projects	Deleted project "Ai  Projects"	2026-07-08 23:04:44.282928
-22	3	Created Task	Task	python ml	Created task "python ml"	2026-07-09 00:10:54.393217
-23	3	created task	task	python ml	Created "python ml"	2026-07-09 00:10:54.400238
-24	3	Created Task	Task	firebase	Created task "firebase"	2026-07-12 12:37:54.896384
-25	3	created task	task	firebase	Created "firebase"	2026-07-12 12:37:54.902816
 \.
 
 
@@ -379,7 +354,6 @@ COPY public.activities (id, user_id, action, target_type, target_name, details, 
 --
 
 COPY public.activity_logs (id, user_name, action, target_type, target_name, details, created_at) FROM stdin;
-1	Parv	created task	task	Docker Setup	Created task from dashboard	2026-06-25 00:30:51.951381
 \.
 
 
@@ -390,7 +364,6 @@ COPY public.activity_logs (id, user_name, action, target_type, target_name, deta
 --
 
 COPY public.notifications (id, user_id, title, message, type, is_read, created_at) FROM stdin;
-1	Task Created	Docker Setup task created successfully.	success	t	2026-06-25 10:19:47.436302
 \.
 
 
@@ -401,7 +374,6 @@ COPY public.notifications (id, user_id, title, message, type, is_read, created_a
 --
 
 COPY public.projects (id, name, description, status, created_at, user_id) FROM stdin;
-1	Pulse Enterprise	Enterprise Project Management Platform	active	2026-06-24 21:00:24.555748	3
 \.
 
 
@@ -412,14 +384,6 @@ COPY public.projects (id, name, description, status, created_at, user_id) FROM s
 --
 
 COPY public.tasks (id, title, description, status, priority, user_id, created_at, project_id, due_date, updated_at) FROM stdin;
-16	firebase	firebase added	in_progress	Low	3	2026-07-12 12:37:54.868428	1	2026-10-22	2026-07-13 11:38:57.393789
-7	docker setup	docker	todo	medium	2	2026-06-26 20:54:08.601658	\N	\N	2026-07-05 23:36:23.853124
-10	pulse enterprises	pulsess	13	Medium	3	2026-06-29 11:29:06.799238	\N	\N	2026-07-13 11:39:10.228831
-8	dockerise	making docker file	done	medium	2	2026-06-26 21:03:59.831621	\N	\N	2026-07-05 23:36:23.853124
-9	figma	figma file	todo	High	3	2026-06-29 11:07:06.980668	\N	2026-07-10	2026-07-06 00:29:16.630683
-13	python	python ml	backlog	Low	3	2026-07-06 00:19:21.936424	\N	\N	2026-07-06 16:27:24.273614
-14	software developer 	java-script	todo	Urgent	3	2026-07-06 16:29:42.115698	\N	\N	2026-07-06 16:29:42.115698
-15	python ml	ml concept	done	High	3	2026-07-09 00:10:54.372671	1	\N	2026-07-11 00:10:17.968577
 \.
 
 
@@ -430,9 +394,6 @@ COPY public.tasks (id, title, description, status, priority, user_id, created_at
 --
 
 COPY public.users (id, name, email, password, created_at, role, avatar, bio, skills, provider, provider_id) FROM stdin;
-1	Parv	parvtest@gmail.com	$2b$10$T9KKk11roMIEYzRj/orKr.HM.PQIbRKv.1gt4tnzbJk57WfrqsLIy	2026-06-24 16:39:42.232392	AI Engineer	\N	\N	\N	local	\N
-2	parv	parvchaudhary@gmail.com	$2b$10$FQYCSR/nqayUSJSfHh7P0eAC.MknCmHPREAQ8rJ6RZg8.PUdN6SNO	2026-06-24 18:19:30.253884	AI Engineer	\N	\N	\N	local	\N
-3	parv123	parv123@gmail.com	$2b$10$ICu81nl3uYMnIThm/Q3T3eV8Ah4F/5hznb9Ske/4mwCf0JxdRvx1i	2026-06-26 20:55:01.594014	AI Engineer	\N	\N	\N	local	\N
 \.
 
 
@@ -442,7 +403,7 @@ COPY public.users (id, name, email, password, created_at, role, avatar, bio, ski
 -- Name: activities_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.activities_id_seq', 25, true);
+SELECT pg_catalog.setval('public.activities_id_seq', 1, false);
 
 
 --
@@ -451,7 +412,7 @@ SELECT pg_catalog.setval('public.activities_id_seq', 25, true);
 -- Name: activity_logs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.activity_logs_id_seq', 1, true);
+SELECT pg_catalog.setval('public.activity_logs_id_seq', 1, false);
 
 
 --
@@ -460,7 +421,7 @@ SELECT pg_catalog.setval('public.activity_logs_id_seq', 1, true);
 -- Name: notifications_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.notifications_id_seq', 1, true);
+SELECT pg_catalog.setval('public.notifications_id_seq', 1, false);
 
 
 --
@@ -469,7 +430,7 @@ SELECT pg_catalog.setval('public.notifications_id_seq', 1, true);
 -- Name: projects_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.projects_id_seq', 2, true);
+SELECT pg_catalog.setval('public.projects_id_seq', 1, false);
 
 
 --
@@ -478,7 +439,7 @@ SELECT pg_catalog.setval('public.projects_id_seq', 2, true);
 -- Name: tasks_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.tasks_id_seq', 16, true);
+SELECT pg_catalog.setval('public.tasks_id_seq', 1, false);
 
 
 --
@@ -487,7 +448,7 @@ SELECT pg_catalog.setval('public.tasks_id_seq', 16, true);
 -- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.users_id_seq', 3, true);
+SELECT pg_catalog.setval('public.users_id_seq', 1, false);
 
 
 --

@@ -1,3 +1,4 @@
+import axios from "axios";
 import React, { useState } from "react";
 import { Eye, EyeOff, Lock, Mail, ArrowRight, Github, Chrome } from "lucide-react";
 import PulseLogo from "./PulseLogo";
@@ -18,9 +19,9 @@ export default function SimpleLoginSignup({
   onLoginSuccess,
 }: SimpleLoginSignupProps) {
   const [isSignUp, setIsSignUp] = useState(initialIsSignUp);
-  const [email, setEmail] = useState("alex.rivera@pulse.io");
-  const [password, setPassword] = useState("password123");
-  const [fullName, setFullName] = useState("Alex Rivera");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [agreeTerms, setAgreeTerms] = useState(true);
   const [error, setError] = useState("");
@@ -31,7 +32,9 @@ export default function SimpleLoginSignup({
     e.preventDefault();
     setError("");
 
-    if (!email || !password) {
+    const normalizedEmail = email.trim().toLowerCase();
+
+    if (!normalizedEmail || !password) {
       setError("Please fill in all layout coordinates.");
       return;
     }
@@ -52,7 +55,7 @@ try {
   if (isSignUp) {
     const response = await authService.register({
       name: fullName,
-      email,
+      email: normalizedEmail,
       password,
     });
 
@@ -64,7 +67,7 @@ try {
     }
   } else {
     const response = await authService.login({
-      email,
+      email: normalizedEmail,
       password,
     });
 
@@ -79,7 +82,10 @@ try {
   }
   }
 } catch (error) {
-  setError("Unable to connect to the server.");
+  const message = axios.isAxiosError(error)
+    ? error.response?.data?.message
+    : undefined;
+  setError(message || "Unable to connect to the server.");
 } finally {
   setLoading(false);
 }
@@ -172,6 +178,8 @@ try {
                 placeholder="alex.rivera@pulse.io"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                autoComplete="email"
+                autoFocus
                 className="w-full h-11 bg-app border border-default focus:border-indigo-500 focus:outline-none rounded-xl pl-10 pr-4 text-sm text-gray-250 cursor-text"
               />
             </div>
@@ -194,6 +202,7 @@ try {
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                autoComplete={isSignUp ? "new-password" : "current-password"}
                 className="w-full h-11 bg-app border border-default focus:border-indigo-500 focus:outline-none rounded-xl pl-10 pr-10 text-sm text-gray-200"
               />
               <button
