@@ -25,10 +25,12 @@ interface MobilePreviewProps {
   onToggleTaskStatus: (id: string) => void;
 }
 
+// Prefer an explicitly configured canonical URL, but default to the address
+// currently open in the browser. This keeps QR codes valid for Vercel preview
+// and production deployments without hard-coding a previous deployment URL.
 const APP_URL =
-  import.meta.env.PROD
-    ? "https://pulse-parv.vercel.app"
-    : window.location.origin;
+  import.meta.env.VITE_APP_URL?.replace(/\/+$/, "") ||
+  window.location.origin;
 
 export default function MobilePreview({
   currentTab,
@@ -686,8 +688,8 @@ export default function MobilePreview({
 
             <p className="mt-2 text-center text-sm text-secondary">
 
-              After deployment, scan this QR code to
-              instantly open Pulse on your mobile device.
+              Scan this QR code to open Pulse on your
+              mobile device. Sign in there to access your workspace.
 
             </p>
 
