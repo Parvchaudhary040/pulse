@@ -64,7 +64,7 @@ Open:
 
 ## 📸 Live Demo
 
-<a href="pulse-zeta-fawn.vercel.app" target="_blank">
+<a href="https://pulse-zeta-fawn.vercel.app/" target="_blank">
   <img src="/public/landingpage.png" alt="Preview" width="100%">
 </a>
 
@@ -80,7 +80,7 @@ Open:
 
 ## 🌐 Live Demo
 
-**Frontend:** pulse-zeta-fawn.vercel.app
+**Frontend:** https://pulse-zeta-fawn.vercel.app/
 
 **Backend:** https://pulse-backend-nw5t.onrender.com
 
