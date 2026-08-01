@@ -3,6 +3,7 @@ import { Router } from "express";
 import {
   registerUser,
   loginUser,
+  loginDemoUser,
   getCurrentUser,
   changePassword,
   updateAvatar,
@@ -25,6 +26,8 @@ router.post(
   "/login",
   loginUser
 );
+
+router.post("/demo", loginDemoUser);
 
 router.get(
   "/me",
