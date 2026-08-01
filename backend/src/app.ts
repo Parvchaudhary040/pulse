@@ -13,15 +13,11 @@ import oauthRoutes from "./routes/oauthRoutes";
 import cors from "cors";
 
 const app = express();
-const allowedOrigins = [
-  process.env.FRONTEND_URL,
-  ...(process.env.CORS_ORIGINS || "").split(","),
-]
-  .map((origin) => origin?.trim())
-  .filter((origin): origin is string => Boolean(origin));
+const allowedOrigins = (process.env.CORS_ORIGINS ?? "http://localhost:3000")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
 
-// Middlewares
-app.use(passport.initialize());
 app.use(
   cors({
     origin(origin, callback) {
@@ -34,6 +30,8 @@ app.use(
     credentials: true,
   })
 );
+// Middlewares
+app.use(passport.initialize());
 app.use(express.json({ limit: "5mb" }));
 app.use("/api/projects", projectRoutes);
 app.use("/api/auth", authRoutes);
@@ -50,6 +48,10 @@ app.get("/", (req, res) => {
     success: true,
     message: "Welcome to Pulse API 🚀",
   });
+});
+
+app.get("/health", (_req, res) => {
+  res.status(200).json({ status: "ok" });
 });
 
 export default app;
