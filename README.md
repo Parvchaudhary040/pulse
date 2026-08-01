@@ -84,6 +84,15 @@ Open:
 
 **Backend:** https://your-backend-url.onrender.com
 
+## Deployment (Neon, Render, and Vercel)
+
+1. Create a Neon database and run [`database/schema.sql`](database/schema.sql) in the Neon SQL editor.
+2. Create a Render Blueprint from this repository. [`render.yaml`](render.yaml) builds and runs the backend service.
+3. In Render, set `DATABASE_URL` to Neon's pooled connection string. Set `FRONTEND_URL` and `CORS_ORIGINS` to your Vercel URL, then configure both OAuth callback URLs with your Render API URL.
+4. Import this repository into Vercel with `frontend` as the Root Directory. Set `VITE_API_URL` to `https://YOUR-RENDER-SERVICE.onrender.com/api` for Production, Preview, and Development. [`frontend/vercel.json`](frontend/vercel.json) keeps React routes working after a page refresh.
+
+For local Docker, no Neon credentials are required: Compose starts PostgreSQL and explicitly disables database TLS. Copy `backend/.env.example` only when local OAuth secrets are needed; keep `DATABASE_URL` empty while using the Docker database.
+
 ## 👨‍💻 Author
 
 **Parv Chaudhary**
