@@ -46,7 +46,7 @@ Pulse is a modern project management platform that helps teams organize projects
 ### Clone the repository
 
 ```bash
-git clone https://github.com/yourusername/pulse.git
+git clone https://github.com/Parvchaudhary040/pulse.git
 
 cd pulse
 ```
@@ -64,7 +64,7 @@ Open:
 
 ## 📸 Live Demo
 
-<a href="" target="_blank">
+<a href="pulse-zeta-fawn.vercel.app" target="_blank">
   <img src="/public/landingpage.png" alt="Preview" width="100%">
 </a>
 
@@ -80,9 +80,9 @@ Open:
 
 ## 🌐 Live Demo
 
-**Frontend:** https://your-frontend-url.vercel.app
+**Frontend:** pulse-zeta-fawn.vercel.app
 
-**Backend:** https://your-backend-url.onrender.com
+**Backend:** https://pulse-backend-nw5t.onrender.com
 
 ## Deployment (Neon, Render, and Vercel)
 
