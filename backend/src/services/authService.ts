@@ -23,6 +23,12 @@ const normalizeRole = (role: unknown): Role =>
     ? (role as Role)
     : "Member";
 
+const demoAccount = {
+  name: "Alex Rivera",
+  email: "alex.rivera@pulse.io",
+  password: "password123",
+} as const;
+
 // ==============================
 // Register User
 // ==============================
@@ -127,6 +133,50 @@ export const login = async (loginData: {
       name: user.name,
       email: user.email,
       role,
+      avatar: user.avatar,
+    },
+  };
+};
+
+// ==============================
+// Demo Account
+// ==============================
+
+export const loginWithDemoAccount = async () => {
+  let result = await pool.query(
+    `SELECT * FROM users WHERE email = $1`,
+    [demoAccount.email]
+  );
+
+  if (result.rows.length === 0) {
+    const hashedPassword = await bcrypt.hash(demoAccount.password, 10);
+
+    await pool.query(
+      `
+      INSERT INTO users (name, email, password, role)
+      VALUES ($1, $2, $3, 'Member')
+      ON CONFLICT (email) DO NOTHING
+      `,
+      [demoAccount.name, demoAccount.email, hashedPassword]
+    );
+
+    result = await pool.query(
+      `SELECT * FROM users WHERE email = $1`,
+      [demoAccount.email]
+    );
+  }
+
+  const user = result.rows[0];
+
+  return {
+    success: true,
+    message: "Demo account ready",
+    token: generateToken(user.id),
+    user: {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: normalizeRole(user.role),
       avatar: user.avatar,
     },
   };

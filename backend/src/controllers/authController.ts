@@ -49,6 +49,14 @@ export const loginUser = async (
 
 };
 
+export const loginDemoUser = async (
+  _req: Request,
+  res: Response
+) => {
+  const result = await authService.loginWithDemoAccount();
+  return res.status(200).json(result);
+};
+
 // ==============================
 // Current User
 // ==============================

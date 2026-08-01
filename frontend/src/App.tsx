@@ -806,6 +806,7 @@ if (loading) {
       <SimpleLoginSignup
         initialIsSignUp={location.pathname === "/signup"}
         onLoginSuccess={handleLoginSuccess}
+        onBackToLanding={() => navigate("/")}
       />
     );
   }
