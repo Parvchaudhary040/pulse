@@ -1,6 +1,6 @@
 import axios from "axios";
 import React, { useState } from "react";
-import { Eye, EyeOff, Lock, Mail, ArrowRight, Github, Chrome } from "lucide-react";
+import { Eye, EyeOff, Lock, Mail, ArrowLeft, ArrowRight, Github, Chrome } from "lucide-react";
 import PulseLogo from "./PulseLogo";
 import * as authService from "../services/authService";
 import {
@@ -12,11 +12,13 @@ import { useAuth } from "../context/AuthContext";
 interface SimpleLoginSignupProps {
   initialIsSignUp?: boolean;
   onLoginSuccess: () => Promise<void>;
+  onBackToLanding: () => void;
 }
 
 export default function SimpleLoginSignup({
   initialIsSignUp = false,
   onLoginSuccess,
+  onBackToLanding,
 }: SimpleLoginSignupProps) {
   const [isSignUp, setIsSignUp] = useState(initialIsSignUp);
   const [email, setEmail] = useState("");
@@ -91,15 +93,23 @@ try {
 }
   };
 
-  const handleDemoLogin = () => {
-    setEmail("alex.rivera@pulse.io");
-    setPassword("password123");
-    setFullName("Alex Rivera");
+  const handleDemoLogin = async () => {
+    setError("");
     setLoading(true);
-    setTimeout(() => {
+
+    try {
+      const response = await authService.loginWithDemoAccount();
+      await login(response.token);
+      await onLoginSuccess();
+      notifySuccess("Welcome to the demo workspace!");
+    } catch (error) {
+      const message = axios.isAxiosError(error)
+        ? error.response?.data?.message
+        : undefined;
+      setError(message || "Unable to open the demo account.");
+    } finally {
       setLoading(false);
-      onLoginSuccess();
-    }, 600);
+    }
   };
   const handleGoogleLogin = () => {
     window.location.assign(authService.getGoogleOAuthUrl());
@@ -116,9 +126,17 @@ try {
 
       {/* Main card */}
       <div className="w-full max-w-md p-8 md:p-10 rounded-2xl bg-surface border border-default/80 shadow-2xl relative z-10">
+        <button
+          type="button"
+          onClick={onBackToLanding}
+          className="absolute top-5 left-5 inline-flex items-center gap-1.5 text-xs text-secondary hover:text-indigo-300 transition-colors"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" />
+          Back to home
+        </button>
         
         {/* Brand logo */}
-        <div className="flex flex-col items-center text-center mb-8">
+        <div className="flex flex-col items-center text-center mb-8 pt-5">
           <div className="mb-3">
             <PulseLogo size="lg" variant="icon" />
           </div>
@@ -136,7 +154,8 @@ try {
         <button 
           type="button" 
           onClick={handleDemoLogin}
-          className="w-full mb-6 p-3 rounded-xl bg-indigo-950/20 text-[#6366f1] text-xs font-semibold border border-[#3e398d]/40 flex items-center justify-between hover:bg-indigo-950/30 transition-all group"
+          disabled={loading}
+          className="w-full mb-6 p-3 rounded-xl bg-indigo-950/20 text-[#6366f1] text-xs font-semibold border border-[#3e398d]/40 flex items-center justify-between hover:bg-indigo-950/30 transition-all group disabled:opacity-50"
         >
           <span>👉 Quick Entry with Demo Account</span>
           <span className="flex items-center gap-1 font-mono uppercase bg-[#6366f1]/20 px-2 py-0.5 rounded text-[10px]">

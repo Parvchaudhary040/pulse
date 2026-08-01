@@ -84,6 +84,11 @@ export const updateAvatar = async (avatar: string) => {
   return response.data;
 };
 
+export const loginWithDemoAccount = async () => {
+  const response = await axios.post(`${API}/auth/demo`);
+  return response.data;
+};
+
 export const updateName = async (name: string) => {
   const response = await axios.put(
     `${API}/auth/profile`,
