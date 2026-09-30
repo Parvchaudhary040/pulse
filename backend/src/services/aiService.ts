@@ -27,7 +27,7 @@ export const askAI = async (
   const completion =
     await groq.chat.completions.create({
 
-      model: "llama-3.3-70b-versatile",
+      model: "openai/gpt-oss-120b",
 
       messages: [
 
@@ -81,7 +81,7 @@ export const analyzeWorkspace = async (
   const completion =
     await groq.chat.completions.create({
 
-      model: "llama-3.3-70b-versatile",
+      model: "openai/gpt-oss-120b",
 
       messages: [
 
